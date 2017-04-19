@@ -8,8 +8,8 @@ use Mix.Config
 # Configures the endpoint
 config :api, Api.Endpoint,
   url: [host: "localhost"],
-  secret_key_base: "qaR14PrAfvaaEo9c0WZWUpjb/J72zfcWPHTVUE6V0enWGYADTyvITgIDfpTfqqqN",
-  render_errors: [view: Api.ErrorView, accepts: ~w(json)],
+  secret_key_base: "nrbREckyi4WTO0drFPyIAsIxfq3KrO8jEKcGNrNKb3et6SMER8qp2tub291Vg6Po",
+  render_errors: [view: Api.ErrorView, accepts: ~w(html json)],
   pubsub: [name: Api.PubSub,
            adapter: Phoenix.PubSub.PG2]
 
