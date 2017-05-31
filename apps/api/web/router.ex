@@ -17,10 +17,14 @@ defmodule Api.Router do
     pipe_through :browser # Use the default browser stack
 
     get "/", PageController, :index
+
+    get "/rides", RideController, :static
   end
 
   # Other scopes may use custom stacks.
-  # scope "/api", Api do
-  #   pipe_through :api
-  # end
+  scope "/api", Api do
+    pipe_through :api
+
+    resources "/rides", RideController, except: [:new, :edit]
+  end
 end

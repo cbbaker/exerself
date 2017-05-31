@@ -1,0 +1,3 @@
+<script>
+  var flags = <%= render(Api.RideView, "index.json", assigns) |> Poison.encode! |> raw %>;
+</script>
