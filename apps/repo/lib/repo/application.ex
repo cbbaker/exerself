@@ -12,7 +12,8 @@ defmodule Repo.Application do
     children = [
       # Starts a worker by calling: Repo.Worker.start_link(arg1, arg2, arg3)
       # worker(Repo.Worker, [arg1, arg2, arg3]),
-      worker(Repo.EventLog, [])
+      worker(Repo.EventLog, []),
+      worker(Repo.Aggregates.TableList, [])
     ]
 
     # See http://elixir-lang.org/docs/stable/elixir/Supervisor.html

@@ -23,7 +23,7 @@ defmodule Repo.EventLog do
   end
 
   def handle_cast({:commit, event_type, payload}, %{log: log, subscribers: subscribers} = state) do
-    message = %{event_type: event_type, payload: payload}
+    message = {event_type, payload}
     @logger.write(log, message)
     Enum.each(subscribers, fn subscriber -> send(subscriber, message) end)
     {:noreply, state}
