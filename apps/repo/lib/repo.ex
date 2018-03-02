@@ -1,6 +1,7 @@
 defmodule Repo do
   alias Repo.EventLog
   alias Repo.Aggregates.TableList
+  alias Repo.Aggregates.Table
 
   @moduledoc """
   EventSource-based repo for Exerself
@@ -19,8 +20,6 @@ defmodule Repo do
     TableList.get()
   end
 
-
-
   @doc """
   Creates a new table in the repo
 
@@ -32,5 +31,13 @@ defmodule Repo do
   """
   def create_table(name) do
     EventLog.commit("create_table", %{name: name})
+  end
+
+  def list_entries(table, start, count) do
+    TableList.get() |> Map.get(table) |> Table.list(start, count)
+  end
+
+  def create_entry(table, entry) do
+    EventLog.commit("create_entry", %{table: table, entry: entry})
   end
 end
