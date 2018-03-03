@@ -31,7 +31,17 @@ defmodule Repo.Aggregates.TableList do
     acc
   end
 
-  def process(event, acc) do
+  def process({"update_entry", %{table: table, entry: entry}}, acc) do
+    acc |> Map.get(table) |> Table.update(entry)
+    acc
+  end
+
+  def process({"delete_entry", %{table: table, entry: entry}}, acc) do
+    acc |> Map.get(table) |> Table.delete(entry)
+    acc
+  end
+
+  def process(_event, acc) do
     acc
   end
   

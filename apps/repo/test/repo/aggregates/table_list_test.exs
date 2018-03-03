@@ -26,4 +26,25 @@ defmodule Repo.Aggregates.TableListTest do
     assert [%{data: "test"}] = TableList.get() |> Map.get("blah") |> Table.list(0, 5)
   end
 
+  test "updates a table entry" do
+    EventLog.commit("create_table", %{name: "blah"})
+    EventLog.commit("create_entry", %{table: "blah", entry: %{id: 6, data: "test"}})
+    Process.sleep(10)
+    assert [%{id: 6, data: "test"}] = TableList.get() |> Map.get("blah") |> Table.list(0, 5)
+
+    EventLog.commit("update_entry", %{table: "blah", entry: %{id: 6, data: "updated"}})
+    Process.sleep(10)
+    assert [%{id: 6, data: "updated"}] = TableList.get() |> Map.get("blah") |> Table.list(0, 5)
+  end
+
+  test "deletes a table entry" do
+    EventLog.commit("create_table", %{name: "blah"})
+    EventLog.commit("create_entry", %{table: "blah", entry: %{id: 6, data: "test"}})
+    Process.sleep(10)
+    assert [%{id: 6, data: "test"}] = TableList.get() |> Map.get("blah") |> Table.list(0, 5)
+
+    EventLog.commit("delete_entry", %{table: "blah", entry: %{id: 6}})
+    Process.sleep(10)
+    assert [] = TableList.get() |> Map.get("blah") |> Table.list(0, 5)
+  end
 end

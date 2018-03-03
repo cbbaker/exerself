@@ -40,4 +40,12 @@ defmodule Repo do
   def create_entry(table, entry) do
     EventLog.commit("create_entry", %{table: table, entry: entry})
   end
+
+  def update_entry(table, entry) do
+    EventLog.commit("update_entry", %{table: table, entry: entry})
+  end
+
+  def delete_entry(table, entry) do
+    EventLog.commit("delete_entry", %{table: table, entry: entry})
+  end
 end
