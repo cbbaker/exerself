@@ -16,7 +16,16 @@ defmodule Repo.Aggregates.TableListTest do
   test "creates a table" do
     EventLog.commit("create_table", %{name: "blah"})
     Process.sleep(10)
-    assert %{"blah" => _pid} = TableList.get()
+    assert TableList.get() |> Map.has_key?("blah")
+  end
+
+  test "deletes a table" do
+    EventLog.commit("create_table", %{name: "blah"})
+    Process.sleep(10)
+    assert TableList.get() |> Map.has_key?("blah")
+    EventLog.commit("delete_table", %{name: "blah"})
+    Process.sleep(10)
+    refute TableList.get() |> Map.has_key?("blah")
   end
 
   test "creates a table entry" do

@@ -17,6 +17,16 @@ defmodule RepoTest do
     assert %{"stuff" => _pid} = Repo.list_tables()
   end
 
+  test "deletes a table" do
+    Repo.create_table("stuff")
+    Process.sleep(10)
+    assert Repo.list_tables() |> Map.has_key?("stuff")
+
+    Repo.delete_table("stuff")
+    Process.sleep(10)
+    refute Repo.list_tables() |> Map.has_key?("stuff")
+  end
+
   test "lists table entries" do
     Repo.create_table("stuff")
     Process.sleep(10)

@@ -5,6 +5,10 @@ defmodule Repo.Aggregates.Table do
     GenServer.start_link(__MODULE__, [])
   end
 
+  def stop(pid) do
+    GenServer.stop(pid)
+  end
+
   def list(pid, start, count) do
     GenServer.call(pid, {:list, start, count})
   end

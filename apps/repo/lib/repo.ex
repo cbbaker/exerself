@@ -33,6 +33,10 @@ defmodule Repo do
     EventLog.commit("create_table", %{name: name})
   end
 
+  def delete_table(name) do
+    EventLog.commit("delete_table", %{name: name})
+  end
+
   def list_entries(table, start, count) do
     TableList.get() |> Map.get(table) |> Table.list(start, count)
   end

@@ -26,6 +26,12 @@ defmodule Repo.Aggregates.TableList do
     Map.put(acc, name, pid)
   end
 
+  def process({"delete_table", %{name: name}}, acc) do
+    {pid, new} = Map.pop(acc, name)
+    Table.stop(pid)
+    new
+  end
+
   def process({"create_entry", %{table: table, entry: entry}}, acc) do
     acc |> Map.get(table) |> Table.create(entry)
     acc
