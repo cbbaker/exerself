@@ -17,8 +17,8 @@ defmodule Repo.EventLogTest do
     [initial_payload: payload]
   end
 
-  test "subscribe returns the already logged terms", %{initial_payload: initial_payload} do
-    assert [{@event_type, ^initial_payload}] = EventLog.subscribe()
+  test "subscribe returns the logger module and data" do
+    assert {_module, _data} = EventLog.subscribe()
   end
 
   test "subscribe receives future logged terms" do

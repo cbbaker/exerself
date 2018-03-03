@@ -30,12 +30,12 @@ defmodule Repo.EventLog do
   end
 
   def handle_call(:subscribe, {from, _}, %{log: log, subscribers: subscribers} = state) do
-    {:reply, @logger.get_terms(log), %{state | subscribers: [from | subscribers]}}
+    {:reply, {@logger, log}, %{state | subscribers: [from | subscribers]}}
   end
 
 
-  def handle_call(:unsubscribe, {from, _}, %{log: log, subscribers: subscribers} = state) do
-    {:reply, @logger.get_terms(log), %{state | subscribers: List.delete(subscribers, from)}}
+  def handle_call(:unsubscribe, {from, _}, %{subscribers: subscribers} = state) do
+    {:reply, :ok, %{state | subscribers: List.delete(subscribers, from)}}
   end
 
 end

@@ -1,9 +1,7 @@
 defmodule Repo.Aggregates.TableListTest do
   use ExUnit.Case
   
-  alias Repo.EventLog
   alias Repo.Aggregates.TableList
-  alias Repo.Aggregates.Table
 
   setup do
     TableList.reset()
@@ -14,46 +12,46 @@ defmodule Repo.Aggregates.TableListTest do
   end
 
   test "creates a table" do
-    EventLog.commit("create_table", %{name: "blah"})
+    Repo.create_table("blah")
     Process.sleep(10)
     assert TableList.get() |> Map.has_key?("blah")
   end
 
   test "deletes a table" do
-    EventLog.commit("create_table", %{name: "blah"})
+    Repo.create_table("blah")
     Process.sleep(10)
     assert TableList.get() |> Map.has_key?("blah")
-    EventLog.commit("delete_table", %{name: "blah"})
+    Repo.delete_table("blah")
     Process.sleep(10)
     refute TableList.get() |> Map.has_key?("blah")
   end
 
   test "creates a table entry" do
-    EventLog.commit("create_table", %{name: "blah"})
-    EventLog.commit("create_entry", %{table: "blah", entry: %{data: "test"}})
+    Repo.create_table("blah")
+    Repo.create_entry("blah", %{data: "test"})
     Process.sleep(10)
-    assert [%{data: "test"}] = TableList.get() |> Map.get("blah") |> Table.list(0, 5)
+    assert [%{data: "test"}] = Repo.list_entries("blah", 0, 5)
   end
 
   test "updates a table entry" do
-    EventLog.commit("create_table", %{name: "blah"})
-    EventLog.commit("create_entry", %{table: "blah", entry: %{id: 6, data: "test"}})
+    Repo.create_table("blah")
+    Repo.create_entry("blah", %{id: 6, data: "test"})
     Process.sleep(10)
-    assert [%{id: 6, data: "test"}] = TableList.get() |> Map.get("blah") |> Table.list(0, 5)
+    assert [%{id: 6, data: "test"}] = Repo.list_entries("blah", 0, 5)
 
-    EventLog.commit("update_entry", %{table: "blah", entry: %{id: 6, data: "updated"}})
+    Repo.update_entry("blah", %{id: 6, data: "updated"})
     Process.sleep(10)
-    assert [%{id: 6, data: "updated"}] = TableList.get() |> Map.get("blah") |> Table.list(0, 5)
+    assert [%{id: 6, data: "updated"}] = Repo.list_entries("blah", 0, 5)
   end
 
   test "deletes a table entry" do
-    EventLog.commit("create_table", %{name: "blah"})
-    EventLog.commit("create_entry", %{table: "blah", entry: %{id: 6, data: "test"}})
+    Repo.create_table("blah")
+    Repo.create_entry("blah", %{id: 6, data: "test"})
     Process.sleep(10)
-    assert [%{id: 6, data: "test"}] = TableList.get() |> Map.get("blah") |> Table.list(0, 5)
+    assert [%{id: 6, data: "test"}] = Repo.list_entries("blah", 0, 5)
 
-    EventLog.commit("delete_entry", %{table: "blah", entry: %{id: 6}})
+    Repo.delete_entry("blah", %{id: 6})
     Process.sleep(10)
-    assert [] = TableList.get() |> Map.get("blah") |> Table.list(0, 5)
+    assert [] = Repo.list_entries("blah", 0, 5)
   end
 end

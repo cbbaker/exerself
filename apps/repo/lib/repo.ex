@@ -30,11 +30,11 @@ defmodule Repo do
 
   """
   def create_table(name) do
-    EventLog.commit("create_table", %{name: name})
+    EventLog.commit(:create_table, %{name: name})
   end
 
   def delete_table(name) do
-    EventLog.commit("delete_table", %{name: name})
+    EventLog.commit(:delete_table, %{name: name})
   end
 
   def list_entries(table, start, count) do
@@ -42,14 +42,14 @@ defmodule Repo do
   end
 
   def create_entry(table, entry) do
-    EventLog.commit("create_entry", %{table: table, entry: entry})
+    EventLog.commit(:create_entry, %{table: table, entry: entry})
   end
 
   def update_entry(table, entry) do
-    EventLog.commit("update_entry", %{table: table, entry: entry})
+    EventLog.commit(:update_entry, %{table: table, entry: entry})
   end
 
   def delete_entry(table, entry) do
-    EventLog.commit("delete_entry", %{table: table, entry: entry})
+    EventLog.commit(:delete_entry, %{table: table, entry: entry})
   end
 end
