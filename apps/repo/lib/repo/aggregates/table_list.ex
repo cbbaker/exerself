@@ -7,7 +7,7 @@ defmodule Repo.Aggregates.TableList do
   defstruct [:logger, :log, :tables]
 
   def start_link() do
-    GenServer.start_link(__MODULE__, %{}, name: TableList)
+    GenServer.start_link(__MODULE__, %Repo.Aggregates.TableList{tables: %{}}, name: TableList)
   end
 
   def get() do
@@ -55,11 +55,12 @@ defmodule Repo.Aggregates.TableList do
   
 
   def handle_call(:get, _from, state) do
-    {:reply, state, state}
+    {:reply, state.tables, state}
   end
 
-  def handle_call(:reset, _from, _state) do
-    {:reply, %{}, %{}}
+  def handle_call(:reset, _from, state) do
+    new = Map.put(state, :tables, %{})
+    {:reply, :ok, new}
   end
 
   def handle_info(:timeout, %{logger: logger, log: log, tables: tables} = state) do
@@ -68,6 +69,7 @@ defmodule Repo.Aggregates.TableList do
   end
 
   def handle_info(msg, state) do
-    {:noreply, process(msg, state)}
+    tables = process(msg, state.tables)
+    {:noreply, Map.put(state, :tables, tables)}
   end
 end

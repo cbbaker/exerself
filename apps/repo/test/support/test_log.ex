@@ -7,6 +7,10 @@ defmodule Repo.TestLog do
     GenServer.start_link(__MODULE__, %Repo.TestLog{name: name}, name: TestLog)
   end
 
+  def close(pid) do
+    GenServer.stop(pid)
+  end
+
   def write(pid, term) do
     GenServer.cast(pid, {:write, term})
   end

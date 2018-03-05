@@ -6,8 +6,16 @@ defmodule Repo.EventLog do
   defstruct [:log, :subscribers]
 
   def start_link() do
-    {:ok, log} = @logger.open(:repo)
-    GenServer.start_link(__MODULE__, %Repo.EventLog{log: log, subscribers: []}, name: EventLog)
+    GenServer.start_link(__MODULE__, :repo, name: EventLog)
+  end
+
+  def init(name) do
+    {:ok, log} = @logger.open(name)
+    {:ok, %Repo.EventLog{log: log, subscribers: []}}
+  end
+
+  def terminate(_reason, %{log: log}) do
+    @logger.close(log)
   end
 
   def commit(event_type, payload) do
