@@ -12,6 +12,11 @@ defmodule Repo.Aggregates.TableTest do
     assert [] = Table.list(pid, 0, 5)
   end
 
+  test "gets the next id and increments it", %{pid: pid} do
+    assert Table.next_id(pid) == 1
+    assert Table.next_id(pid) == 2
+  end
+
   test "adds an entry", %{pid: pid} do
     Table.create(pid, %{data: "test"})
     assert [%{data: "test"}] = Table.list(pid, 0, 5)

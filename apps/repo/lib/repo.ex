@@ -42,7 +42,10 @@ defmodule Repo do
   end
 
   def create_entry(table, entry) do
-    EventLog.commit(:create_entry, %{table: table, entry: entry})
+    id = TableList.get() |> Map.get(table) |> Table.next_id()
+    new = Map.put(entry, :id, id)
+    EventLog.commit(:create_entry, %{table: table, entry: new})
+    new
   end
 
   def update_entry(table, entry) do
