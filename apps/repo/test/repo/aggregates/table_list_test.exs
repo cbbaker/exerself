@@ -2,13 +2,26 @@ defmodule Repo.Aggregates.TableListTest do
   use ExUnit.Case
   
   alias Repo.Aggregates.TableList
+  alias Repo.Aggregates.Table
+  alias TestLog
 
-  setup do
+  setup context do
+    Repo.TestLog.reset()
+    if context[:commits] do
+      Enum.each(context[:commits], fn commit -> Repo.TestLog.write(TestLog, commit) end)
+    end
     TableList.reset()
   end
 
   defp sleep() do
     Process.sleep(10)
+  end
+
+  @tag commits: [{:create_table, %{name: "stuff"}},
+                 {:create_entry, %{table: "stuff", entry: %{id: 5, data: "data"}}}]
+  test "updates the next_id of all tables on init" do
+    sleep()
+    assert TableList.get() |> Map.get("stuff") |> Table.next_id() == 6
   end
 
   test "returns the current list of tables" do

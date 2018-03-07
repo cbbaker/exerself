@@ -53,18 +53,28 @@ defmodule Repo.Aggregates.TableList do
     acc
   end
   
+  defp replay_log(%{logger: logger, log: log, tables: tables}) do
+    logger.get_terms(log) |>
+      Enum.reduce(tables, &process/2) |> 
+      init_next_ids()
+  end
+
+  defp init_next_ids(tables) do
+    Map.values(tables) |> Enum.each(&Table.init_next_id/1)
+    tables
+  end
 
   def handle_call(:get, _from, state) do
     {:reply, state.tables, state}
   end
 
   def handle_call(:reset, _from, state) do
-    new = Map.put(state, :tables, %{})
-    {:reply, :ok, new}
+    new = replay_log(state)
+    {:reply, :ok, Map.put(state, :tables, new)}
   end
 
-  def handle_info(:timeout, %{logger: logger, log: log, tables: tables} = state) do
-    new = logger.get_terms(log) |> Enum.reduce(tables, &process/2)
+  def handle_info(:timeout, state) do
+    new = replay_log(state)
     {:noreply, Map.put(state, :tables, new)}
   end
 

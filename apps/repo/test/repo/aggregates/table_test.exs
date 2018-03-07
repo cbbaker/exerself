@@ -17,6 +17,17 @@ defmodule Repo.Aggregates.TableTest do
     assert Table.next_id(pid) == 2
   end
 
+  test "initializes next_id when empty", %{pid: pid} do
+    Table.init_next_id(pid)
+    assert Table.next_id(pid) == 1
+  end
+
+  test "initializes next_id when non-empty", %{pid: pid} do
+    Table.create(pid, %{id: 5})
+    Table.init_next_id(pid)
+    assert Table.next_id(pid) == 6
+  end
+
   test "adds an entry", %{pid: pid} do
     Table.create(pid, %{data: "test"})
     assert [%{data: "test"}] = Table.list(pid, 0, 5)
