@@ -1,0 +1,3 @@
+<script>
+  flags = <%= render("index.json", %{conn: @conn, data_source: @data_source}) |> Poison.encode!() |> raw() %>;
+</script>

@@ -1,0 +1,8 @@
+<div class="list-group">
+  <%= for data_source <- @data_sources do %>
+  <a class="list-group-item list-group-item-action"
+     href="<%= data_path(@conn, :static, data_source) %>">
+    <%= data_source %>
+  </a>
+  <% end %>
+</div>
