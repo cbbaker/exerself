@@ -47,7 +47,79 @@ defmodule Import do
                                                  "power" => "int",
                                                  "heart_rate" => "int",
                                                  "notes" => "text"},
-      [], [])
+      [
+        %{row:
+          [
+            [%{tag: "variable", name: "started_at"}],
+            [%{tag: "variable", name: "duration"},
+             %{tag: "string", text: " min"}]
+          ]
+         },
+        %{row:
+          [
+            [%{tag: "variable", name: "power"},
+             %{tag: "string", text: " W"}],
+            [%{tag: "variable", name: "heart_rate"},
+             %{tag: "string", text: " BPM"}],
+            [%{tag: "ratio", numerator: "power", denominator: "heart_rate", precision: 3}]
+          ]},
+        %{row:
+          [
+            [%{tag: "variable", name: "notes"}]
+          ]}
+      ], [
+        %{
+          init: %{
+            type: "date",
+            name: "started_at",
+            label: "Started at"
+          },
+          default: %{
+            type: "currentTime"
+          }
+        },
+        %{
+          init: %{
+            type: "int",
+            name: "duration",
+            label: "Duration"
+          },
+          default: %{
+            type: "lastCreated",
+            variable: "duration"
+          }
+        },
+        %{
+          init: %{
+            type: "int",
+            name: "power",
+            label: "Power"
+          },
+          default: %{
+            type: "lastCreated",
+            variable: "power"
+          }
+        },
+        %{
+          init: %{
+            type: "int",
+            name: "heart_rate",
+            label: "Heart rate"
+          },
+          default: %{
+            type: "lastCreated",
+            variable: "heart_rate"
+          }
+        },
+        %{
+          init: %{
+            type: "text",
+            name: "notes",
+            label: "Notes"
+          }
+        }
+
+      ])
     Enum.reverse(rides) |> Enum.map(&(DataSource.create_entry("stationary_bike_rides", &1)))
   end
 
@@ -57,7 +129,76 @@ defmodule Import do
                                            "distance" => "float",
                                            "heart_rate" => "int",
                                            "notes" => "text"},
-      [], [])
+      [
+        %{row:
+          [
+            [%{tag: "variable", name: "started_at"}]
+          ]},
+        %{row:
+          [
+            [%{tag: "hms", name: "duration"}],
+            [%{tag: "variable", name: "distance"},
+             %{tag: "string", text: " mi"}],
+            [%{tag: "variable", name: "heart_rate"},
+             %{tag: "string", text: " BPM"}]
+          ]},
+        %{row:
+          [
+            [%{tag: "variable", name: "notes"}]
+          ]}
+      ], [
+        %{
+          init: %{
+            type: "date",
+            name: "started_at",
+            label: "Started at"
+          },
+          default: %{
+            type: "currentTime"
+          }
+        },
+        %{
+          init: %{
+            type: "hms",
+            name: "duration",
+            label: "Duration"
+          },
+          default: %{
+            type: "lastCreated",
+            variable: "duration"
+          }
+        },
+        %{
+          init: %{
+            type: "float",
+            name: "distance",
+            label: "Distance"
+          },
+          default: %{
+            type: "lastCreated",
+            variable: "distance"
+          }
+        },
+        %{
+          init: %{
+            type: "int",
+            name: "heart_rate",
+            label: "Heart rate"
+          },
+          default: %{
+            type: "lastCreated",
+            variable: "heart_rate"
+          }
+        },
+        %{
+          init: %{
+            type: "text",
+            name: "notes",
+            label: "Notes"
+          }
+        }
+
+      ])
     Enum.reverse(rides) |> Enum.map(&(DataSource.create_entry("road_bike_rides", &1)))
   end
 
