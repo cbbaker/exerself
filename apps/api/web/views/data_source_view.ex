@@ -3,6 +3,7 @@ defmodule Api.DataSourceView do
 
   def render("index.json", %{conn: conn, data_sources: data_sources}) do
     %{ uri: data_source_path(conn, :index),
+       nav: show_nav(conn, data_sources, :none),
        data: render_many(data_sources, Api.DataSourceView, "data_source.json", conn: conn)
     }
   end
@@ -14,6 +15,7 @@ defmodule Api.DataSourceView do
   end
 
   def render("show.json", %{conn: conn,
+                            data_sources: data_sources,
                             data_source: %{
                                name: name,
                                schema: schema,
@@ -24,6 +26,7 @@ defmodule Api.DataSourceView do
     %{
       uri: data_source_path(conn, :show, name),
       name: name,
+      nav: show_nav(conn, data_sources, name),
       schema: schema,
       editors: show_editors(editors),
       viewers: show_viewers(viewers),
@@ -51,6 +54,29 @@ defmodule Api.DataSourceView do
 
        }
     }
+  end
+
+  def show_nav(conn, data_sources, current) do
+    %{ 
+      brand: "Exerself",
+      menus: [
+        %{
+          type: "item",
+          name: "Overview",
+          uri: "/data-sources",
+          active: current == :none
+        },
+        %{
+          type: "menu",
+          name: "Data",
+          items: Enum.map(data_sources, &(show_item(&1, data_path(conn, :static, &1), &1 == current)))
+        }
+      ]
+    }
+  end
+
+  defp show_item(name, uri, active) do
+    %{type: "item", name: name, uri: uri, active: active}
   end
 
   defp show_editors(editors) do
