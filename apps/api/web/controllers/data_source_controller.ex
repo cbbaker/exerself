@@ -12,7 +12,8 @@ defmodule Api.DataSourceController do
   end
 
   def show(conn, %{"id" => name}) do
-    if !Enum.member?(DataSource.list(1000), name) do
+    data_sources = DataSource.list(1000)
+    if !Enum.member?(data_sources, name) do
       raise Api.NotFound
     end
 
@@ -24,13 +25,14 @@ defmodule Api.DataSourceController do
       entries: DataSource.get_entries(name, 100)
     }
     
-    render(conn, "show.json", data_source: data_source)
+    render(conn, "show.json", data_source: data_source, data_sources: data_sources)
   end
 
   def create(conn, %{"data_source" => %{"name" => name,
                                         "schema" => schema,
                                         "viewers" => viewers,
                                         "editors" => editors}}) do
+    data_sources = DataSource.list(1000)
     DataSource.create(name, schema, viewers, editors)
     data_source = %{
       name: name,
@@ -42,7 +44,7 @@ defmodule Api.DataSourceController do
     conn
     |> put_status(:created)
     |> put_resp_header("location", data_source_path(conn, :show, name))
-    |> render("show.json", data_source: data_source)
+    |> render("show.json", data_source: data_source, data_sources: data_sources)
   end
 
   # TODO: implement delete--cbb 2018-03-17

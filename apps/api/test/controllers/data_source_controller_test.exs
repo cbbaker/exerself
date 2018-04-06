@@ -24,7 +24,7 @@ defmodule Api.DataSourceControllerTest do
   test "lists all entries on index", %{conn: conn} do
     data_source = "test"
     DataSource.create(data_source, %{}, [], [])
-    conn = get conn, data_source_path(conn, :show, data_source)
+    conn = get conn, data_source_path(conn, :show, data_source, data_sources: [data_source])
     assert %{"name" => ^data_source} = json_response(conn, 200)
   end
 

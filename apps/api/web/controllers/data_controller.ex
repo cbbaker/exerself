@@ -2,7 +2,8 @@ defmodule Api.DataController do
   use Api.Web, :controller
 
   def static(conn, %{"data_source" => name}) do
-    if !Enum.member?(DataSource.list(1000), name) do
+    data_sources = DataSource.list(1000)
+    if !Enum.member?(data_sources, name) do
       raise Api.NotFound
     end
 
@@ -14,7 +15,7 @@ defmodule Api.DataController do
       entries: DataSource.get_entries(name, 100)
     }
     
-    render(conn, "index.html", data_source: data_source)
+    render(conn, "index.html", data_source: data_source, data_sources: data_sources)
   end
 
   def create(conn, %{"data_source_id" => name, "data" => data}) do
