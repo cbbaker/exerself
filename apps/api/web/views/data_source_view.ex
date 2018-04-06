@@ -1,12 +1,16 @@
 defmodule Api.DataSourceView do
   use Api.Web, :view
 
-  def render("index.json", %{"data-sources": data_sources}) do
-    %{data: render_many(data_sources, Api.DataSourceView, "data_source.json")}
+  def render("index.json", %{conn: conn, data_sources: data_sources}) do
+    %{ uri: data_source_path(conn, :index),
+       data: render_many(data_sources, Api.DataSourceView, "data_source.json", conn: conn)
+    }
   end
 
-  def render("data_source.json", %{data_source: data_source}) do
-    data_source
+  def render("data_source.json", %{conn: conn, data_source: data_source}) do
+    %{name: data_source,
+      uri: data_path(conn, :static, data_source)
+    }
   end
 
   def render("show.json", %{conn: conn,

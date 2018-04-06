@@ -8,7 +8,7 @@ defmodule Api.DataSourceController do
 
   def index(conn, _params) do
     data_sources = DataSource.list(100)
-    render(conn, "index.json", "data-sources": data_sources)
+    render(conn, "index.json", data_sources: data_sources)
   end
 
   def show(conn, %{"id" => name}) do
