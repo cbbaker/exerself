@@ -20926,7 +20926,15 @@ var _user$project$Entries$deleteButton = F2(
 								{
 									ctor: '::',
 									_0: _elm_lang$html$Html_Attributes$class('float-left'),
-									_1: {ctor: '[]'}
+									_1: {
+										ctor: '::',
+										_0: _elm_lang$html$Html_Attributes$id(
+											A2(
+												_elm_lang$core$Basics_ops['++'],
+												'delete/',
+												_elm_lang$core$Basics$toString(i))),
+										_1: {ctor: '[]'}
+									}
 								}),
 							_1: {ctor: '[]'}
 						}
@@ -20954,7 +20962,15 @@ var _user$project$Entries$deleteButton = F2(
 								{
 									ctor: '::',
 									_0: _elm_lang$html$Html_Attributes$class('float-left'),
-									_1: {ctor: '[]'}
+									_1: {
+										ctor: '::',
+										_0: _elm_lang$html$Html_Attributes$id(
+											A2(
+												_elm_lang$core$Basics_ops['++'],
+												'delete/',
+												_elm_lang$core$Basics$toString(i))),
+										_1: {ctor: '[]'}
+									}
 								}),
 							_1: {ctor: '[]'}
 						}
@@ -21001,7 +21017,20 @@ var _user$project$Entries$rightButtons = F2(
 								ctor: '::',
 								_0: _rundis$elm_bootstrap$Bootstrap_Button$onClick(
 									_user$project$Entries$Cancel(i)),
-								_1: {ctor: '[]'}
+								_1: {
+									ctor: '::',
+									_0: _rundis$elm_bootstrap$Bootstrap_Button$attrs(
+										{
+											ctor: '::',
+											_0: _elm_lang$html$Html_Attributes$id(
+												A2(
+													_elm_lang$core$Basics_ops['++'],
+													'cancel/',
+													_elm_lang$core$Basics$toString(i))),
+											_1: {ctor: '[]'}
+										}),
+									_1: {ctor: '[]'}
+								}
 							}
 						},
 						{
@@ -21020,7 +21049,20 @@ var _user$project$Entries$rightButtons = F2(
 									ctor: '::',
 									_0: _rundis$elm_bootstrap$Bootstrap_Button$onClick(
 										_user$project$Entries$Save(i)),
-									_1: {ctor: '[]'}
+									_1: {
+										ctor: '::',
+										_0: _rundis$elm_bootstrap$Bootstrap_Button$attrs(
+											{
+												ctor: '::',
+												_0: _elm_lang$html$Html_Attributes$id(
+													A2(
+														_elm_lang$core$Basics_ops['++'],
+														'save/',
+														_elm_lang$core$Basics$toString(i))),
+												_1: {ctor: '[]'}
+											}),
+										_1: {ctor: '[]'}
+									}
 								}
 							},
 							{
@@ -21057,7 +21099,20 @@ var _user$project$Entries$rightButtons = F2(
 								ctor: '::',
 								_0: _rundis$elm_bootstrap$Bootstrap_Button$onClick(
 									_user$project$Entries$Cancel(i)),
-								_1: {ctor: '[]'}
+								_1: {
+									ctor: '::',
+									_0: _rundis$elm_bootstrap$Bootstrap_Button$attrs(
+										{
+											ctor: '::',
+											_0: _elm_lang$html$Html_Attributes$id(
+												A2(
+													_elm_lang$core$Basics_ops['++'],
+													'cancel/',
+													_elm_lang$core$Basics$toString(i))),
+											_1: {ctor: '[]'}
+										}),
+									_1: {ctor: '[]'}
+								}
 							}
 						},
 						{
@@ -21075,7 +21130,20 @@ var _user$project$Entries$rightButtons = F2(
 								_1: {
 									ctor: '::',
 									_0: _rundis$elm_bootstrap$Bootstrap_Button$disabled(true),
-									_1: {ctor: '[]'}
+									_1: {
+										ctor: '::',
+										_0: _rundis$elm_bootstrap$Bootstrap_Button$attrs(
+											{
+												ctor: '::',
+												_0: _elm_lang$html$Html_Attributes$id(
+													A2(
+														_elm_lang$core$Basics_ops['++'],
+														'save/',
+														_elm_lang$core$Basics$toString(i))),
+												_1: {ctor: '[]'}
+											}),
+										_1: {ctor: '[]'}
+									}
 								}
 							},
 							{
@@ -21098,7 +21166,20 @@ var _user$project$Entries$createRecord = F2(
 			A2(_user$project$Entries$rightButtons, i, true));
 		return A2(
 			_rundis$elm_bootstrap$Bootstrap_ListGroup$li,
-			{ctor: '[]'},
+			{
+				ctor: '::',
+				_0: _rundis$elm_bootstrap$Bootstrap_ListGroup$attrs(
+					{
+						ctor: '::',
+						_0: _elm_lang$html$Html_Attributes$id(
+							A2(
+								_elm_lang$core$Basics_ops['++'],
+								'item/',
+								_elm_lang$core$Basics$toString(i))),
+						_1: {ctor: '[]'}
+					}),
+				_1: {ctor: '[]'}
+			},
 			{
 				ctor: '::',
 				_0: A2(
@@ -21106,7 +21187,15 @@ var _user$project$Entries$createRecord = F2(
 					{
 						ctor: '::',
 						_0: _elm_lang$html$Html_Attributes$class('w-100'),
-						_1: {ctor: '[]'}
+						_1: {
+							ctor: '::',
+							_0: _elm_lang$html$Html_Attributes$id(
+								A2(
+									_elm_lang$core$Basics_ops['++'],
+									'create/',
+									_elm_lang$core$Basics$toString(i))),
+							_1: {ctor: '[]'}
+						}
 					},
 					fields),
 				_1: {ctor: '[]'}
@@ -21130,7 +21219,20 @@ var _user$project$Entries$editRecord = F4(
 					_user$project$Entries$canDelete(record))));
 		return A2(
 			_rundis$elm_bootstrap$Bootstrap_ListGroup$li,
-			{ctor: '[]'},
+			{
+				ctor: '::',
+				_0: _rundis$elm_bootstrap$Bootstrap_ListGroup$attrs(
+					{
+						ctor: '::',
+						_0: _elm_lang$html$Html_Attributes$id(
+							A2(
+								_elm_lang$core$Basics_ops['++'],
+								'item/',
+								_elm_lang$core$Basics$toString(i))),
+						_1: {ctor: '[]'}
+					}),
+				_1: {ctor: '[]'}
+			},
 			{
 				ctor: '::',
 				_0: A2(
@@ -21138,7 +21240,15 @@ var _user$project$Entries$editRecord = F4(
 					{
 						ctor: '::',
 						_0: _elm_lang$html$Html_Attributes$class('w-100'),
-						_1: {ctor: '[]'}
+						_1: {
+							ctor: '::',
+							_0: _elm_lang$html$Html_Attributes$id(
+								A2(
+									_elm_lang$core$Basics_ops['++'],
+									'edit/',
+									_elm_lang$core$Basics$toString(i))),
+							_1: {ctor: '[]'}
+						}
 					},
 					fields),
 				_1: {ctor: '[]'}
@@ -21181,7 +21291,15 @@ var _user$project$Entries$viewRecord = F3(
 								_0: {ctor: '_Tuple2', _0: 'width', _1: '100%'},
 								_1: {ctor: '[]'}
 							}),
-						_1: attribs
+						_1: {
+							ctor: '::',
+							_0: _elm_lang$html$Html_Attributes$id(
+								A2(
+									_elm_lang$core$Basics_ops['++'],
+									'item/',
+									_elm_lang$core$Basics$toString(i))),
+							_1: attribs
+						}
 					},
 					contents),
 				_1: {ctor: '[]'}
@@ -21258,7 +21376,16 @@ var _user$project$Entries$view = function (model) {
 						_1: {
 							ctor: '::',
 							_0: _rundis$elm_bootstrap$Bootstrap_Button$onClick(_user$project$Entries$StartCreate),
-							_1: {ctor: '[]'}
+							_1: {
+								ctor: '::',
+								_0: _rundis$elm_bootstrap$Bootstrap_Button$attrs(
+									{
+										ctor: '::',
+										_0: _elm_lang$html$Html_Attributes$id('newButton'),
+										_1: {ctor: '[]'}
+									}),
+								_1: {ctor: '[]'}
+							}
 						}
 					},
 					{
@@ -21696,29 +21823,45 @@ var _user$project$Sources$Click = function (a) {
 	return {ctor: 'Click', _0: a};
 };
 var _user$project$Sources$view = function (model) {
-	var viewItem = function (_p1) {
-		var _p2 = _p1;
+	var humanize = function (_p1) {
 		return A2(
-			_rundis$elm_bootstrap$Bootstrap_ListGroup$anchor,
-			{
-				ctor: '::',
-				_0: _rundis$elm_bootstrap$Bootstrap_ListGroup$attrs(
-					{
-						ctor: '::',
-						_0: _elm_lang$html$Html_Events$onClick(
-							_user$project$Sources$Click(_p2.uri)),
-						_1: {ctor: '[]'}
-					}),
-				_1: {ctor: '[]'}
-			},
-			{
-				ctor: '::',
-				_0: _elm_lang$html$Html$text(_p2.name),
-				_1: {ctor: '[]'}
-			});
+			_elm_lang$core$String$join,
+			' ',
+			A2(_elm_lang$core$String$split, '_', _p1));
 	};
+	var viewItem = F2(
+		function (i, _p2) {
+			var _p3 = _p2;
+			return A2(
+				_rundis$elm_bootstrap$Bootstrap_ListGroup$anchor,
+				{
+					ctor: '::',
+					_0: _rundis$elm_bootstrap$Bootstrap_ListGroup$attrs(
+						{
+							ctor: '::',
+							_0: _elm_lang$html$Html_Attributes$id(
+								A2(
+									_elm_lang$core$Basics_ops['++'],
+									'source/',
+									_elm_lang$core$Basics$toString(i))),
+							_1: {
+								ctor: '::',
+								_0: _elm_lang$html$Html_Events$onClick(
+									_user$project$Sources$Click(_p3.uri)),
+								_1: {ctor: '[]'}
+							}
+						}),
+					_1: {ctor: '[]'}
+				},
+				{
+					ctor: '::',
+					_0: _elm_lang$html$Html$text(
+						humanize(_p3.name)),
+					_1: {ctor: '[]'}
+				});
+		});
 	return _rundis$elm_bootstrap$Bootstrap_ListGroup$custom(
-		A2(_elm_lang$core$List$map, viewItem, model));
+		A2(_elm_lang$core$List$indexedMap, viewItem, model));
 };
 
 var _user$project$Navbar$update = F2(
