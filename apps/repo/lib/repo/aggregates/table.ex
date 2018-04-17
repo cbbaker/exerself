@@ -11,8 +11,16 @@ defmodule Repo.Aggregates.Table do
     GenServer.stop(pid)
   end
 
-  def list(pid, start, count) do
-    GenServer.call(pid, {:list, start, count})
+  def init(args) do
+    {:ok, args}
+  end
+
+  def list(pid, count, last) do
+    GenServer.call(pid, {:list, count, last})
+  end
+
+  def list(pid, count) do
+    GenServer.call(pid, {:list, count})
   end
 
   def init_next_id(pid) do
@@ -35,8 +43,13 @@ defmodule Repo.Aggregates.Table do
     GenServer.cast(pid, {:delete, entry})
   end
 
-  def handle_call({:list, start, count}, _from, %{entries: entries} = state) do
-    result = entries |> Enum.drop(start) |> Enum.take(count)
+  def handle_call({:list, count, last}, _from, %{entries: entries} = state) do
+    result = entries |> Enum.drop_while(fn (entry) -> entry.id >= last end) |> Enum.take(count)
+    {:reply, result, state}
+  end
+
+  def handle_call({:list, count}, _from, %{entries: entries} = state) do
+    result = entries |> Enum.take(count)
     {:reply, result, state}
   end
 

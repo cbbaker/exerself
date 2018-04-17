@@ -15,8 +15,13 @@ defmodule DataSource do
       []
 
   """
-  def list(count, start \\ 0) do
-    Repo.list_entries("data_sources", start, count) |>
+  def list(count, last) do
+    Repo.list_entries("data_sources", count, last) |>
+      Enum.map(&(&1.name))
+  end
+
+  def list(count) do
+    Repo.list_entries("data_sources", count) |>
       Enum.map(&(&1.name))
   end
 
@@ -36,20 +41,24 @@ defmodule DataSource do
   end
 
   def get_schema(name) do
-    [schema] = Repo.list_entries(schema_table_name(name), 0, 1000)
+    [schema] = Repo.list_entries(schema_table_name(name), 1000)
     schema
   end
 
   def get_viewers(name) do
-    Repo.list_entries(viewers_table_name(name), 0, 1000)
+    Repo.list_entries(viewers_table_name(name), 1000)
   end
 
   def get_editors(name) do
-    Repo.list_entries(editors_table_name(name), 0, 1000)
+    Repo.list_entries(editors_table_name(name), 1000)
   end
 
-  def get_entries(name, count, start \\ 0) do
-    Repo.list_entries(entries_table_name(name), start, count)
+  def get_entries(name, count, last) do
+    Repo.list_entries(entries_table_name(name), count, last)
+  end
+
+  def get_entries(name, count) do
+    Repo.list_entries(entries_table_name(name), count)
   end
 
   def create_entry(name, entry) do

@@ -37,8 +37,12 @@ defmodule Repo do
     EventLog.commit(:delete_table, %{name: name})
   end
 
-  def list_entries(table, start, count) do
-    TableList.get() |> Map.get(table) |> Table.list(start, count)
+  def list_entries(table, count, last) do
+    TableList.get() |> Map.get(table) |> Table.list(count, last)
+  end
+
+  def list_entries(table, count) do
+    TableList.get() |> Map.get(table) |> Table.list(count)
   end
 
   def create_entry(table, entry) do

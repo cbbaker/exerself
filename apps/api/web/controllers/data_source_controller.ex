@@ -11,7 +11,7 @@ defmodule Api.DataSourceController do
     render(conn, "index.json", data_sources: data_sources)
   end
 
-  def show(conn, %{"id" => name}) do
+  def show(conn, %{"id" => name} = params) do
     data_sources = DataSource.list(1000)
     if !Enum.member?(data_sources, name) do
       raise Api.NotFound
@@ -22,10 +22,35 @@ defmodule Api.DataSourceController do
       schema: DataSource.get_schema(name) |> Map.delete(:id),
       viewers: DataSource.get_viewers(name),
       editors: DataSource.get_editors(name),
-      entries: DataSource.get_entries(name, 100)
+      entries: get_entries(name, params)
     }
     
     render(conn, "show.json", data_source: data_source, data_sources: data_sources)
+  end
+
+  defp get_entries(name, %{"count" => count_string, "last" => last_string}) do
+    {count, _} = Integer.parse(count_string)
+    {last, _} = Integer.parse(last_string)
+    entries_plus_one = DataSource.get_entries(name, count + 1, last)
+    entries = Enum.take(entries_plus_one, count)
+    next_page = if length(entries_plus_one) > count do
+      %{"count" => count, "last" => List.last(entries).id}
+    end
+    {entries, next_page}
+  end
+
+  defp get_entries(name, %{"count" => count_string}) do
+    {count, _} = Integer.parse(count_string)
+    entries_plus_one = DataSource.get_entries(name, count + 1)
+    entries = Enum.take(entries_plus_one, count)
+    next_page = if length(entries_plus_one) > count do
+      %{"count" => count, "last" => List.last(entries).id}
+    end
+    {entries, next_page}
+  end
+
+  defp get_entries(name, _) do
+    get_entries(name, %{"count" => "20"})
   end
 
   def create(conn, %{"data_source" => %{"name" => name,
@@ -39,7 +64,7 @@ defmodule Api.DataSourceController do
       schema: schema,
       viewers: viewers,
       editors: editors,
-      entries: []
+      entries: {[], nil}
     }
     conn
     |> put_status(:created)

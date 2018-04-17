@@ -1,7 +1,7 @@
 defmodule Api.DataController do
   use Api.Web, :controller
 
-  def static(conn, %{"data_source" => name}) do
+  def static(conn, %{"data_source" => name} = params) do
     data_sources = DataSource.list(1000)
     if !Enum.member?(data_sources, name) do
       raise Api.NotFound
@@ -12,10 +12,35 @@ defmodule Api.DataController do
       schema: DataSource.get_schema(name) |> Map.delete(:id),
       viewers: DataSource.get_viewers(name),
       editors: DataSource.get_editors(name),
-      entries: DataSource.get_entries(name, 100)
+      entries: get_entries(name, params)
     }
     
     render(conn, "index.html", data_source: data_source, data_sources: data_sources)
+  end
+
+  defp get_entries(name, %{"count" => count_string, "last" => last_string}) do
+    {count, _} = Integer.parse(count_string)
+    {last, _} = Integer.parse(last_string)
+    entries_plus_one = DataSource.get_entries(name, count + 1, last)
+    entries = Enum.take(entries_plus_one, count)
+    next_page = if length(entries_plus_one) > count do
+      %{"count" => count, "last" => List.last(entries).id}
+    end
+    {entries, next_page}
+  end
+
+  defp get_entries(name, %{"count" => count_string}) do
+    {count, _} = Integer.parse(count_string)
+    entries_plus_one = DataSource.get_entries(name, count + 1)
+    entries = Enum.take(entries_plus_one, count)
+    next_page = if length(entries_plus_one) > count do
+      %{"count" => count, "last" => List.last(entries).id}
+    end
+    {entries, next_page}
+  end
+
+  defp get_entries(name, _) do
+    get_entries(name, %{"count" => "20"})
   end
 
   def create(conn, %{"data_source_id" => name, "data" => data}) do
