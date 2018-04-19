@@ -32,28 +32,28 @@ defmodule RepoTest do
   end
 
   test "lists table entries", %{table: table, entry: entry} do
-    assert [^entry] = Repo.list_entries(table, 0, 5)
+    assert [^entry] = Repo.list_entries(table, 5)
   end
 
   test "adds a table entry", %{table: table, entry: entry} do
     other = Repo.create_entry(table, %{data: "other"})
     sleep()
-    assert [^other, ^entry] = Repo.list_entries(table, 0, 5)
+    assert [^other, ^entry] = Repo.list_entries(table, 5)
   end
 
   test "updates a table entry", %{table: table, entry: %{id: id} = entry} do
-    assert [^entry] = Repo.list_entries(table, 0, 5)
+    assert [^entry] = Repo.list_entries(table, 5)
 
     Repo.update_entry(table, %{id: id, data: "updated"})
     sleep()
-    assert [%{id: ^id, data: "updated"}] = Repo.list_entries(table, 0, 5)
+    assert [%{id: ^id, data: "updated"}] = Repo.list_entries(table, 5)
   end
 
   test "deletes a table entry", %{table: table, entry: %{id: id} = entry} do
-    assert [^entry] = Repo.list_entries(table, 0, 5)
+    assert [^entry] = Repo.list_entries(table, 5)
 
     Repo.delete_entry(table, %{id: id})
     Process.sleep(10)
-    assert [] = Repo.list_entries(table, 0, 5)
+    assert [] = Repo.list_entries(table, 5)
   end
 end

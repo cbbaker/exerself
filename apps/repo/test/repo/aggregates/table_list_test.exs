@@ -48,7 +48,7 @@ defmodule Repo.Aggregates.TableListTest do
     sleep()
     entry = Repo.create_entry("blah", %{data: "test"})
     sleep()
-    assert [^entry] = Repo.list_entries("blah", 0, 5)
+    assert [^entry] = Repo.list_entries("blah", 5)
   end
 
   test "updates a table entry" do
@@ -56,12 +56,12 @@ defmodule Repo.Aggregates.TableListTest do
     sleep()
     entry = Repo.create_entry("blah", %{data: "test"})
     sleep()
-    assert [^entry] = Repo.list_entries("blah", 0, 5)
+    assert [^entry] = Repo.list_entries("blah", 5)
 
     Repo.update_entry("blah", %{id: entry.id, data: "updated"})
     sleep()
     %{id: id} = entry
-    assert [%{id: ^id, data: "updated"}] = Repo.list_entries("blah", 0, 5)
+    assert [%{id: ^id, data: "updated"}] = Repo.list_entries("blah", 5)
   end
 
   test "deletes a table entry" do
@@ -69,10 +69,10 @@ defmodule Repo.Aggregates.TableListTest do
     sleep()
     entry = Repo.create_entry("blah", %{data: "test"})
     sleep()
-    assert [^entry] = Repo.list_entries("blah", 0, 5)
+    assert [^entry] = Repo.list_entries("blah", 5)
 
     Repo.delete_entry("blah", %{id: entry.id})
     sleep()
-    assert [] = Repo.list_entries("blah", 0, 5)
+    assert [] = Repo.list_entries("blah", 5)
   end
 end

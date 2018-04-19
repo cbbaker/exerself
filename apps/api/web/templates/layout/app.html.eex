@@ -27,6 +27,19 @@
     <script>
       var node = document.getElementById('main');
       var app = Elm.Main.embed(node, flags);
+
+      window.addEventListener('scroll', function () {
+            var h = document.documentElement,
+                b = document.body,
+                st = 'scrollTop',
+                sh = 'scrollHeight';
+
+            app.ports.onScroll.send({
+              scrollTop: h[st]||b[st],
+              documentHeight: h[sh]||b[sh],
+              windowHeight: h.clientHeight
+            });
+      });
     </script>
   </body>
 </html>

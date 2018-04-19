@@ -20566,6 +20566,14 @@ var _user$project$Viewer$decodeConfig = A2(
 		_elm_lang$core$Json_Decode$list(
 			_elm_lang$core$Json_Decode$list(_user$project$Viewer$decodeElement))));
 
+var _user$project$Entries$appendPage = F2(
+	function (model, newPage) {
+		return _elm_lang$core$Native_Utils.update(
+			model,
+			{
+				entries: A2(_elm_lang$core$Basics_ops['++'], model.entries, newPage.entries)
+			});
+	});
 var _user$project$Entries$makeRow = function (items) {
 	var _p0 = items;
 	if (_p0.ctor === '[]') {
@@ -21794,6 +21802,10 @@ var _user$project$Entries$update = F2(
 		}
 	});
 
+var _user$project$Sources$appendPage = F2(
+	function (model, newPage) {
+		return A2(_elm_lang$core$Basics_ops['++'], model, newPage);
+	});
 var _user$project$Sources$update = F2(
 	function (msg, model) {
 		var _p0 = msg;
@@ -22060,6 +22072,30 @@ var _user$project$Navbar$view = function (_p5) {
 					_rundis$elm_bootstrap$Bootstrap_Navbar$config(_user$project$Navbar$NavbarMsg)))));
 };
 
+var _user$project$Scroll$onScroll = _elm_lang$core$Native_Platform.incomingPort(
+	'onScroll',
+	A2(
+		_elm_lang$core$Json_Decode$andThen,
+		function (scrollTop) {
+			return A2(
+				_elm_lang$core$Json_Decode$andThen,
+				function (documentHeight) {
+					return A2(
+						_elm_lang$core$Json_Decode$andThen,
+						function (windowHeight) {
+							return _elm_lang$core$Json_Decode$succeed(
+								{scrollTop: scrollTop, documentHeight: documentHeight, windowHeight: windowHeight});
+						},
+						A2(_elm_lang$core$Json_Decode$field, 'windowHeight', _elm_lang$core$Json_Decode$float));
+				},
+				A2(_elm_lang$core$Json_Decode$field, 'documentHeight', _elm_lang$core$Json_Decode$float));
+		},
+		A2(_elm_lang$core$Json_Decode$field, 'scrollTop', _elm_lang$core$Json_Decode$float)));
+var _user$project$Scroll$Info = F3(
+	function (a, b, c) {
+		return {scrollTop: a, documentHeight: b, windowHeight: c};
+	});
+
 var _user$project$Main$mainView = function (html) {
 	return A2(
 		_rundis$elm_bootstrap$Bootstrap_Grid$container,
@@ -22092,23 +22128,39 @@ var _user$project$Main$mainView = function (html) {
 			_1: {ctor: '[]'}
 		});
 };
+var _user$project$Main$needNewPage = function (_p0) {
+	var _p1 = _p0;
+	return _elm_lang$core$Native_Utils.cmp(_p1.scrollTop, 0.2 * (_p1.documentHeight - _p1.windowHeight)) > 0;
+};
 var _user$project$Main$debugDecoder = function (decoder) {
 	return A2(
 		_elm_lang$core$Json_Decode$andThen,
 		function (value) {
-			var _p0 = A2(_elm_lang$core$Json_Decode$decodeValue, decoder, value);
-			if (_p0.ctor === 'Ok') {
-				return _elm_lang$core$Json_Decode$succeed(_p0._0);
+			var _p2 = A2(_elm_lang$core$Json_Decode$decodeValue, decoder, value);
+			if (_p2.ctor === 'Ok') {
+				return _elm_lang$core$Json_Decode$succeed(_p2._0);
 			} else {
 				return _elm_lang$core$Json_Decode$fail(
-					A2(_elm_lang$core$Debug$log, 'can\'t decode: ', _p0._0));
+					A2(_elm_lang$core$Debug$log, 'can\'t decode: ', _p2._0));
 			}
 		},
 		_elm_lang$core$Json_Decode$value);
 };
+var _user$project$Main$Paginated = F2(
+	function (a, b) {
+		return {object: a, nextPage: b};
+	});
+var _user$project$Main$decodePaginated = function (decodeResource) {
+	return A3(
+		_elm_lang$core$Json_Decode$map2,
+		_user$project$Main$Paginated,
+		decodeResource,
+		_elm_lang$core$Json_Decode$maybe(
+			A2(_elm_lang$core$Json_Decode$field, 'nextPage', _elm_lang$core$Json_Decode$string)));
+};
 var _user$project$Main$Model = F2(
 	function (a, b) {
-		return {nav: a, page: b};
+		return {nav: a, resource: b};
 	});
 var _user$project$Main$Error = function (a) {
 	return {ctor: 'Error', _0: a};
@@ -22130,54 +22182,172 @@ var _user$project$Main$decode = function (navbar) {
 			'nav',
 			_user$project$Navbar$decode(navbar)),
 		_elm_lang$core$Json_Decode$oneOf(
-			{
-				ctor: '::',
-				_0: _user$project$Main$decodeSources,
-				_1: {
+			A2(
+				_elm_lang$core$List$map,
+				_user$project$Main$decodePaginated,
+				{
 					ctor: '::',
-					_0: _user$project$Main$decodeEntries,
-					_1: {ctor: '[]'}
+					_0: _user$project$Main$decodeSources,
+					_1: {
+						ctor: '::',
+						_0: _user$project$Main$decodeEntries,
+						_1: {ctor: '[]'}
+					}
+				})));
+};
+var _user$project$Main$appendPage = F2(
+	function (model, newPage) {
+		var _p3 = {ctor: '_Tuple2', _0: model.resource.object, _1: newPage.resource.object};
+		_v2_2:
+		do {
+			if (_p3.ctor === '_Tuple2') {
+				switch (_p3._0.ctor) {
+					case 'Index':
+						if (_p3._1.ctor === 'Index') {
+							var resource = model.resource;
+							var newResource = _elm_lang$core$Native_Utils.update(
+								resource,
+								{
+									object: _user$project$Main$Index(
+										A2(_user$project$Sources$appendPage, _p3._0._0, _p3._1._0)),
+									nextPage: newPage.resource.nextPage
+								});
+							return _elm_lang$core$Native_Utils.update(
+								model,
+								{resource: newResource});
+						} else {
+							break _v2_2;
+						}
+					case 'Show':
+						if (_p3._1.ctor === 'Show') {
+							var resource = model.resource;
+							var newResource = _elm_lang$core$Native_Utils.update(
+								resource,
+								{
+									object: _user$project$Main$Show(
+										A2(_user$project$Entries$appendPage, _p3._0._0, _p3._1._0)),
+									nextPage: newPage.resource.nextPage
+								});
+							return _elm_lang$core$Native_Utils.update(
+								model,
+								{resource: newResource});
+						} else {
+							break _v2_2;
+						}
+					default:
+						break _v2_2;
 				}
-			}));
+			} else {
+				break _v2_2;
+			}
+		} while(false);
+		return model;
+	});
+var _user$project$Main$ScrollMsg = function (a) {
+	return {ctor: 'ScrollMsg', _0: a};
 };
 var _user$project$Main$NavbarMsg = function (a) {
 	return {ctor: 'NavbarMsg', _0: a};
 };
-var _user$project$Main$subscriptions = function (_p1) {
-	var _p2 = _p1;
-	return A2(
+var _user$project$Main$subscriptions = function (_p4) {
+	var _p5 = _p4;
+	var navSub = A2(
 		_elm_lang$core$Platform_Sub$map,
 		_user$project$Main$NavbarMsg,
-		_user$project$Navbar$subscriptions(_p2.nav));
+		_user$project$Navbar$subscriptions(_p5.nav));
+	var _p6 = _p5.resource.nextPage;
+	if (_p6.ctor === 'Just') {
+		return _elm_lang$core$Platform_Sub$batch(
+			{
+				ctor: '::',
+				_0: _user$project$Scroll$onScroll(_user$project$Main$ScrollMsg),
+				_1: {
+					ctor: '::',
+					_0: navSub,
+					_1: {ctor: '[]'}
+				}
+			});
+	} else {
+		return _elm_lang$core$Platform_Sub$batch(
+			{
+				ctor: '::',
+				_0: navSub,
+				_1: {ctor: '[]'}
+			});
+	}
 };
+var _user$project$Main$NextPage = function (a) {
+	return {ctor: 'NextPage', _0: a};
+};
+var _user$project$Main$getNextPage = F2(
+	function (nav, maybeUrl) {
+		var _p7 = maybeUrl;
+		if (_p7.ctor === 'Just') {
+			return {
+				ctor: '::',
+				_0: A3(
+					_user$project$Ajax$get,
+					_p7._0,
+					_user$project$Main$decode(nav),
+					_user$project$Main$NextPage),
+				_1: {ctor: '[]'}
+			};
+		} else {
+			return {ctor: '[]'};
+		}
+	});
 var _user$project$Main$init = F2(
 	function (flags, location) {
-		var _p3 = _user$project$Navbar$init;
-		var navbarState = _p3._0;
-		var navbarCmd = _p3._1;
+		var _p8 = _user$project$Navbar$init;
+		var navbarState = _p8._0;
+		var navbarCmd = _p8._1;
 		var model = function () {
-			var _p4 = A2(
+			var _p9 = A2(
 				_elm_lang$core$Json_Decode$decodeValue,
 				_user$project$Main$debugDecoder(
 					_user$project$Main$decode(navbarState)),
 				flags);
-			if (_p4.ctor === 'Ok') {
-				return _p4._0;
+			if (_p9.ctor === 'Ok') {
+				return _p9._0;
 			} else {
 				return A2(
 					_user$project$Main$Model,
 					navbarState,
-					_user$project$Main$Error(_p4._0));
+					A2(
+						_user$project$Main$Paginated,
+						_user$project$Main$Error(_p9._0),
+						_elm_lang$core$Maybe$Nothing));
 			}
 		}();
+		var cmds = A2(_user$project$Main$getNextPage, model.nav, model.resource.nextPage);
 		return A2(
 			_elm_lang$core$Platform_Cmd_ops['!'],
 			model,
 			{
 				ctor: '::',
 				_0: A2(_elm_lang$core$Platform_Cmd$map, _user$project$Main$NavbarMsg, navbarCmd),
-				_1: {ctor: '[]'}
+				_1: cmds
 			});
+	});
+var _user$project$Main$maybeLoadPage = F2(
+	function (scrollInfo, model) {
+		if (_user$project$Main$needNewPage(scrollInfo)) {
+			var resource = model.resource;
+			var newResource = _elm_lang$core$Native_Utils.update(
+				resource,
+				{nextPage: _elm_lang$core$Maybe$Nothing});
+			return A2(
+				_elm_lang$core$Platform_Cmd_ops['!'],
+				_elm_lang$core$Native_Utils.update(
+					model,
+					{resource: newResource}),
+				A2(_user$project$Main$getNextPage, model.nav, model.resource.nextPage));
+		} else {
+			return A2(
+				_elm_lang$core$Platform_Cmd_ops['!'],
+				model,
+				{ctor: '[]'});
+		}
 	});
 var _user$project$Main$Loaded = function (a) {
 	return {ctor: 'Loaded', _0: a};
@@ -22193,20 +22363,23 @@ var _user$project$Main$SourcesMsg = function (a) {
 };
 var _user$project$Main$update = F2(
 	function (msg, model) {
-		var _p5 = msg;
-		switch (_p5.ctor) {
+		var _p10 = msg;
+		switch (_p10.ctor) {
 			case 'SourcesMsg':
-				var _p6 = model.page;
-				if (_p6.ctor === 'Index') {
-					var _p7 = A2(_user$project$Sources$update, _p5._0, _p6._0);
-					var newSources = _p7._0;
-					var cmd = _p7._1;
+				var _p11 = model.resource.object;
+				if (_p11.ctor === 'Index') {
+					var _p12 = A2(_user$project$Sources$update, _p10._0, _p11._0);
+					var newSources = _p12._0;
+					var cmd = _p12._1;
 					return A2(
 						_elm_lang$core$Platform_Cmd_ops['!'],
 						_elm_lang$core$Native_Utils.update(
 							model,
 							{
-								page: _user$project$Main$Index(newSources)
+								resource: A2(
+									_user$project$Main$Paginated,
+									_user$project$Main$Index(newSources),
+									model.resource.nextPage)
 							}),
 						{
 							ctor: '::',
@@ -22220,17 +22393,20 @@ var _user$project$Main$update = F2(
 						{ctor: '[]'});
 				}
 			case 'EntriesMsg':
-				var _p8 = model.page;
-				if (_p8.ctor === 'Show') {
-					var _p9 = A2(_user$project$Entries$update, _p5._0, _p8._0);
-					var newEntries = _p9._0;
-					var cmd = _p9._1;
+				var _p13 = model.resource.object;
+				if (_p13.ctor === 'Show') {
+					var _p14 = A2(_user$project$Entries$update, _p10._0, _p13._0);
+					var newEntries = _p14._0;
+					var cmd = _p14._1;
 					return A2(
 						_elm_lang$core$Platform_Cmd_ops['!'],
 						_elm_lang$core$Native_Utils.update(
 							model,
 							{
-								page: _user$project$Main$Show(newEntries)
+								resource: A2(
+									_user$project$Main$Paginated,
+									_user$project$Main$Show(newEntries),
+									model.resource.nextPage)
 							}),
 						{
 							ctor: '::',
@@ -22251,31 +22427,47 @@ var _user$project$Main$update = F2(
 						ctor: '::',
 						_0: A3(
 							_user$project$Ajax$get,
-							A2(_elm_lang$core$Basics_ops['++'], '/api', _p5._0.pathname),
+							A2(_elm_lang$core$Basics_ops['++'], '/api', _p10._0.pathname),
 							_user$project$Main$decode(model.nav),
 							_user$project$Main$Loaded),
 						_1: {ctor: '[]'}
 					});
 			case 'Loaded':
-				if (_p5._0.ctor === 'Ok') {
+				if (_p10._0.ctor === 'Ok') {
+					var _p15 = _p10._0._0;
 					return A2(
 						_elm_lang$core$Platform_Cmd_ops['!'],
-						_p5._0._0,
-						{ctor: '[]'});
+						_p15,
+						A2(_user$project$Main$getNextPage, model.nav, _p15.resource.nextPage));
 				} else {
 					return A2(
 						_elm_lang$core$Platform_Cmd_ops['!'],
 						_elm_lang$core$Native_Utils.update(
 							model,
 							{
-								page: _user$project$Main$Error(_p5._0._0)
+								resource: A2(
+									_user$project$Main$Paginated,
+									_user$project$Main$Error(_p10._0._0),
+									_elm_lang$core$Maybe$Nothing)
 							}),
 						{ctor: '[]'});
 				}
-			default:
-				var _p10 = A2(_user$project$Navbar$update, _p5._0, model.nav);
-				var newNav = _p10._0;
-				var cmd = _p10._1;
+			case 'NextPage':
+				if (_p10._0.ctor === 'Ok') {
+					return A2(
+						_elm_lang$core$Platform_Cmd_ops['!'],
+						A2(_user$project$Main$appendPage, model, _p10._0._0),
+						{ctor: '[]'});
+				} else {
+					return A2(
+						_elm_lang$core$Platform_Cmd_ops['!'],
+						model,
+						{ctor: '[]'});
+				}
+			case 'NavbarMsg':
+				var _p16 = A2(_user$project$Navbar$update, _p10._0, model.nav);
+				var newNav = _p16._0;
+				var cmd = _p16._1;
 				return A2(
 					_elm_lang$core$Platform_Cmd_ops['!'],
 					_elm_lang$core$Native_Utils.update(
@@ -22286,23 +22478,25 @@ var _user$project$Main$update = F2(
 						_0: A2(_elm_lang$core$Platform_Cmd$map, _user$project$Main$NavbarMsg, cmd),
 						_1: {ctor: '[]'}
 					});
+			default:
+				return A2(_user$project$Main$maybeLoadPage, _p10._0, model);
 		}
 	});
-var _user$project$Main$view = function (_p11) {
-	var _p12 = _p11;
+var _user$project$Main$view = function (_p17) {
+	var _p18 = _p17;
 	var html = function () {
-		var _p13 = _p12.page;
-		switch (_p13.ctor) {
+		var _p19 = _p18.resource.object;
+		switch (_p19.ctor) {
 			case 'Index':
 				return A2(
 					_elm_lang$html$Html$map,
 					_user$project$Main$SourcesMsg,
-					_user$project$Sources$view(_p13._0));
+					_user$project$Sources$view(_p19._0));
 			case 'Show':
 				return A2(
 					_elm_lang$html$Html$map,
 					_user$project$Main$EntriesMsg,
-					_user$project$Entries$view(_p13._0));
+					_user$project$Entries$view(_p19._0));
 			default:
 				return _rundis$elm_bootstrap$Bootstrap_Alert$danger(
 					{
@@ -22312,7 +22506,7 @@ var _user$project$Main$view = function (_p11) {
 							{ctor: '[]'},
 							{
 								ctor: '::',
-								_0: _elm_lang$html$Html$text(_p13._0),
+								_0: _elm_lang$html$Html$text(_p19._0),
 								_1: {ctor: '[]'}
 							}),
 						_1: {ctor: '[]'}
@@ -22327,7 +22521,7 @@ var _user$project$Main$view = function (_p11) {
 			_0: A2(
 				_elm_lang$html$Html$map,
 				_user$project$Main$NavbarMsg,
-				_user$project$Navbar$view(_p12.nav)),
+				_user$project$Navbar$view(_p18.nav)),
 			_1: {
 				ctor: '::',
 				_0: _user$project$Main$mainView(html),

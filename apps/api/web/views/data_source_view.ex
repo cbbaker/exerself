@@ -21,9 +21,9 @@ defmodule Api.DataSourceView do
                                schema: schema,
                                viewers: viewers,
                                editors: editors,
-                               entries: entries
+                               entries: {entries, next_page}
                             }}) do
-    %{
+    retval = %{
       uri: data_source_path(conn, :show, name),
       name: name,
       nav: show_nav(conn, data_sources, name),
@@ -38,6 +38,11 @@ defmodule Api.DataSourceView do
         }
       }
     }
+    if next_page do
+      Map.put(retval, :nextPage, data_source_path(conn, :show, name, next_page))
+    else
+      retval
+    end
   end
 
   def show_entry(conn, name, entry) do

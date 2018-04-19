@@ -9,7 +9,7 @@ defmodule Repo.Aggregates.TableTest do
   end
 
   test "lists the entries in the table", %{pid: pid} do
-    assert [] = Table.list(pid, 0, 5)
+    assert [] = Table.list(pid, 5)
   end
 
   test "gets the next id and increments it", %{pid: pid} do
@@ -30,22 +30,22 @@ defmodule Repo.Aggregates.TableTest do
 
   test "adds an entry", %{pid: pid} do
     Table.create(pid, %{data: "test"})
-    assert [%{data: "test"}] = Table.list(pid, 0, 5)
+    assert [%{data: "test"}] = Table.list(pid, 5)
   end
 
   test "updates an entry", %{pid: pid} do
     Table.create(pid, %{id: 6, data: "test"})
     Table.create(pid, %{id: 7, data: "don't change"})
-    assert [%{id: 7, data: "don't change"}, %{id: 6, data: "test"}] = Table.list(pid, 0, 5)
+    assert [%{id: 7, data: "don't change"}, %{id: 6, data: "test"}] = Table.list(pid, 5)
     Table.update(pid, %{id: 6, data: "updated"})
-    assert [%{id: 7, data: "don't change"}, %{id: 6, data: "updated"}] = Table.list(pid, 0, 5)
+    assert [%{id: 7, data: "don't change"}, %{id: 6, data: "updated"}] = Table.list(pid, 5)
   end
 
   test "deletes an entry", %{pid: pid} do
     Table.create(pid, %{id: 6, data: "test"})
     Table.create(pid, %{id: 7, data: "don't change"})
-    assert [%{id: 7, data: "don't change"}, %{id: 6, data: "test"}] = Table.list(pid, 0, 5)
+    assert [%{id: 7, data: "don't change"}, %{id: 6, data: "test"}] = Table.list(pid, 5)
     Table.delete(pid, %{id: 6})
-    assert [%{id: 7, data: "don't change"}] = Table.list(pid, 0, 5)
+    assert [%{id: 7, data: "don't change"}] = Table.list(pid, 5)
   end
 end
