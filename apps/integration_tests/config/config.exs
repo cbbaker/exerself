@@ -30,3 +30,5 @@ use Mix.Config
 #     import_config "#{Mix.env}.exs"
 
 config :hound, driver: "phantomjs"
+
+config :integration_tests, :session, System.get_env("EXERSELF_APP_SESSION")
