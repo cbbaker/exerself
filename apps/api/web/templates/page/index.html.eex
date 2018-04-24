@@ -1,0 +1,18 @@
+<script>
+  flags = {
+  "uri": "/fixtures/auth.json",
+  "title": "Sign in",
+  "nav":
+  {
+    "brand": "Exerself",
+    "menus": []
+  },
+  "links":
+  {
+    "login": {
+      "text": "Sign in via Google",
+      "url": "/auth/google"
+    }
+  }
+};
+</script>

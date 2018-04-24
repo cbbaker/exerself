@@ -18,6 +18,8 @@ defmodule Api.Router do
   scope "/auth", Api do
     pipe_through :browser
 
+    get "/logout", AuthController, :delete
+
     get "/:provider", AuthController, :request
     get "/:provider/callback", AuthController, :callback
   end
