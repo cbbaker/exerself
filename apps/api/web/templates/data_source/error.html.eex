@@ -1,0 +1,3 @@
+<script>
+  flags = <%= %{error: @message} |> Poison.encode!() |> raw() %>;
+</script>

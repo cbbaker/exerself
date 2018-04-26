@@ -7,10 +7,21 @@ defmodule Api.Router do
     plug :fetch_flash
     plug :protect_from_forgery
     plug :put_secure_browser_headers
+    plug Api.Auth
   end
 
   pipeline :api do
     plug :accepts, ["json"]
+    plug Api.Auth
+  end
+
+  scope "/auth", Api do
+    pipe_through :browser
+
+    get "/logout", AuthController, :delete
+
+    get "/:provider", AuthController, :request
+    get "/:provider/callback", AuthController, :callback
   end
 
   scope "/", Api do

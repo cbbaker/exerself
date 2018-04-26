@@ -21901,9 +21901,9 @@ var _user$project$Navbar$MenuLink = F3(
 	function (a, b, c) {
 		return {name: a, uri: b, active: c};
 	});
-var _user$project$Navbar$Model = F3(
-	function (a, b, c) {
-		return {brand: a, menus: b, state: c};
+var _user$project$Navbar$Model = F4(
+	function (a, b, c, d) {
+		return {brand: a, menus: b, auth: c, state: d};
 	});
 var _user$project$Navbar$Item = function (a) {
 	return {ctor: 'Item', _0: a};
@@ -21943,15 +21943,40 @@ var _user$project$Navbar$decodeMenu = _elm_lang$core$Json_Decode$oneOf(
 			_1: {ctor: '[]'}
 		}
 	});
+var _user$project$Navbar$LoggedOut = {ctor: 'LoggedOut'};
+var _user$project$Navbar$decodeLoggedOut = _elm_lang$core$Json_Decode$succeed(_user$project$Navbar$LoggedOut);
+var _user$project$Navbar$LoggedIn = F2(
+	function (a, b) {
+		return {ctor: 'LoggedIn', _0: a, _1: b};
+	});
+var _user$project$Navbar$decodeLoggedIn = A2(
+	_elm_lang$core$Json_Decode$field,
+	'auth',
+	A3(
+		_elm_lang$core$Json_Decode$map2,
+		_user$project$Navbar$LoggedIn,
+		A2(_elm_lang$core$Json_Decode$field, 'name', _elm_lang$core$Json_Decode$string),
+		A2(_elm_lang$core$Json_Decode$field, 'url', _elm_lang$core$Json_Decode$string)));
+var _user$project$Navbar$decodeAuth = _elm_lang$core$Json_Decode$oneOf(
+	{
+		ctor: '::',
+		_0: _user$project$Navbar$decodeLoggedIn,
+		_1: {
+			ctor: '::',
+			_0: _user$project$Navbar$decodeLoggedOut,
+			_1: {ctor: '[]'}
+		}
+	});
 var _user$project$Navbar$decode = function (model) {
-	return A4(
-		_elm_lang$core$Json_Decode$map3,
+	return A5(
+		_elm_lang$core$Json_Decode$map4,
 		_user$project$Navbar$Model,
 		A2(_elm_lang$core$Json_Decode$field, 'brand', _elm_lang$core$Json_Decode$string),
 		A2(
 			_elm_lang$core$Json_Decode$field,
 			'menus',
 			_elm_lang$core$Json_Decode$list(_user$project$Navbar$decodeMenu)),
+		_user$project$Navbar$decodeAuth,
 		_elm_lang$core$Json_Decode$succeed(model.state));
 };
 var _user$project$Navbar$NavbarMsg = function (a) {
@@ -21963,10 +21988,11 @@ var _user$project$Navbar$init = function () {
 	var cmd = _p2._1;
 	return A2(
 		_elm_lang$core$Platform_Cmd_ops['!'],
-		A3(
+		A4(
 			_user$project$Navbar$Model,
 			'',
 			{ctor: '[]'},
+			_user$project$Navbar$LoggedOut,
 			state),
 		{
 			ctor: '::',
@@ -21983,13 +22009,88 @@ var _user$project$Navbar$Click = function (a) {
 };
 var _user$project$Navbar$view = function (_p5) {
 	var _p6 = _p5;
+	var viewAuth = function (auth) {
+		var _p7 = auth;
+		if (_p7.ctor === 'LoggedIn') {
+			return A2(
+				_rundis$elm_bootstrap$Bootstrap_Navbar$textItem,
+				{ctor: '[]'},
+				{
+					ctor: '::',
+					_0: A2(
+						_elm_lang$html$Html$i,
+						{ctor: '[]'},
+						{
+							ctor: '::',
+							_0: _elm_lang$html$Html$text('signed in as '),
+							_1: {ctor: '[]'}
+						}),
+					_1: {
+						ctor: '::',
+						_0: A2(
+							_elm_lang$html$Html$span,
+							{ctor: '[]'},
+							{
+								ctor: '::',
+								_0: _elm_lang$html$Html$text(_p7._0),
+								_1: {ctor: '[]'}
+							}),
+						_1: {
+							ctor: '::',
+							_0: A2(
+								_rundis$elm_bootstrap$Bootstrap_Button$linkButton,
+								{
+									ctor: '::',
+									_0: _rundis$elm_bootstrap$Bootstrap_Button$secondary,
+									_1: {
+										ctor: '::',
+										_0: _rundis$elm_bootstrap$Bootstrap_Button$attrs(
+											{
+												ctor: '::',
+												_0: _elm_lang$html$Html_Attributes$class('ml-2'),
+												_1: {
+													ctor: '::',
+													_0: _elm_lang$html$Html_Attributes$href(_p7._1),
+													_1: {ctor: '[]'}
+												}
+											}),
+										_1: {ctor: '[]'}
+									}
+								},
+								{
+									ctor: '::',
+									_0: _elm_lang$html$Html$text('sign out'),
+									_1: {ctor: '[]'}
+								}),
+							_1: {ctor: '[]'}
+						}
+					}
+				});
+		} else {
+			return A2(
+				_rundis$elm_bootstrap$Bootstrap_Navbar$textItem,
+				{ctor: '[]'},
+				{
+					ctor: '::',
+					_0: A2(
+						_elm_lang$html$Html$i,
+						{ctor: '[]'},
+						{
+							ctor: '::',
+							_0: _elm_lang$html$Html$text('not signed in'),
+							_1: {ctor: '[]'}
+						}),
+					_1: {ctor: '[]'}
+				});
+		}
+	};
 	var viewEntry = function (entry) {
-		var _p7 = entry;
-		if (_p7.ctor === 'SubMenu') {
-			var _p9 = _p7._0;
+		var _p8 = entry;
+		if (_p8.ctor === 'SubMenu') {
+			var _p10 = _p8._0;
 			var viewItem = function (menuEntry) {
-				var _p8 = menuEntry;
-				if (_p8.ctor === 'Item') {
+				var _p9 = menuEntry;
+				if (_p9.ctor === 'Item') {
 					return {
 						ctor: '::',
 						_0: A2(
@@ -21997,12 +22098,12 @@ var _user$project$Navbar$view = function (_p5) {
 							{
 								ctor: '::',
 								_0: _elm_lang$html$Html_Events$onClick(
-									_user$project$Navbar$Click(_p8._0.uri)),
+									_user$project$Navbar$Click(_p9._0.uri)),
 								_1: {ctor: '[]'}
 							},
 							{
 								ctor: '::',
-								_0: _elm_lang$html$Html$text(_p8._0.name),
+								_0: _elm_lang$html$Html$text(_p9._0.name),
 								_1: {ctor: '[]'}
 							}),
 						_1: {ctor: '[]'}
@@ -22013,43 +22114,43 @@ var _user$project$Navbar$view = function (_p5) {
 			};
 			return _rundis$elm_bootstrap$Bootstrap_Navbar$dropdown(
 				{
-					id: _p9,
+					id: _p10,
 					toggle: A2(
 						_rundis$elm_bootstrap$Bootstrap_Navbar$dropdownToggle,
 						{ctor: '[]'},
 						{
 							ctor: '::',
-							_0: _elm_lang$html$Html$text(_p9),
+							_0: _elm_lang$html$Html$text(_p10),
 							_1: {ctor: '[]'}
 						}),
-					items: A2(_elm_lang$core$List$concatMap, viewItem, _p7._1)
+					items: A2(_elm_lang$core$List$concatMap, viewItem, _p8._1)
 				});
 		} else {
-			var _p11 = _p7._0.uri;
-			var _p10 = _p7._0.name;
-			return _p7._0.active ? A2(
+			var _p12 = _p8._0.uri;
+			var _p11 = _p8._0.name;
+			return _p8._0.active ? A2(
 				_rundis$elm_bootstrap$Bootstrap_Navbar$itemLinkActive,
 				{
 					ctor: '::',
 					_0: _elm_lang$html$Html_Events$onClick(
-						_user$project$Navbar$Click(_p11)),
+						_user$project$Navbar$Click(_p12)),
 					_1: {ctor: '[]'}
 				},
 				{
 					ctor: '::',
-					_0: _elm_lang$html$Html$text(_p10),
+					_0: _elm_lang$html$Html$text(_p11),
 					_1: {ctor: '[]'}
 				}) : A2(
 				_rundis$elm_bootstrap$Bootstrap_Navbar$itemLink,
 				{
 					ctor: '::',
 					_0: _elm_lang$html$Html_Events$onClick(
-						_user$project$Navbar$Click(_p11)),
+						_user$project$Navbar$Click(_p12)),
 					_1: {ctor: '[]'}
 				},
 				{
 					ctor: '::',
-					_0: _elm_lang$html$Html$text(_p10),
+					_0: _elm_lang$html$Html$text(_p11),
 					_1: {ctor: '[]'}
 				});
 		}
@@ -22058,18 +22159,25 @@ var _user$project$Navbar$view = function (_p5) {
 		_rundis$elm_bootstrap$Bootstrap_Navbar$view,
 		_p6.state,
 		A2(
-			_rundis$elm_bootstrap$Bootstrap_Navbar$items,
-			A2(_elm_lang$core$List$map, viewEntry, _p6.menus),
-			A3(
-				_rundis$elm_bootstrap$Bootstrap_Navbar$brand,
-				{ctor: '[]'},
-				{
-					ctor: '::',
-					_0: _elm_lang$html$Html$text('Exerself'),
-					_1: {ctor: '[]'}
-				},
-				_rundis$elm_bootstrap$Bootstrap_Navbar$withAnimation(
-					_rundis$elm_bootstrap$Bootstrap_Navbar$config(_user$project$Navbar$NavbarMsg)))));
+			_rundis$elm_bootstrap$Bootstrap_Navbar$customItems,
+			{
+				ctor: '::',
+				_0: viewAuth(_p6.auth),
+				_1: {ctor: '[]'}
+			},
+			A2(
+				_rundis$elm_bootstrap$Bootstrap_Navbar$items,
+				A2(_elm_lang$core$List$map, viewEntry, _p6.menus),
+				A3(
+					_rundis$elm_bootstrap$Bootstrap_Navbar$brand,
+					{ctor: '[]'},
+					{
+						ctor: '::',
+						_0: _elm_lang$html$Html$text('Exerself'),
+						_1: {ctor: '[]'}
+					},
+					_rundis$elm_bootstrap$Bootstrap_Navbar$withAnimation(
+						_rundis$elm_bootstrap$Bootstrap_Navbar$config(_user$project$Navbar$NavbarMsg))))));
 };
 
 var _user$project$Scroll$onScroll = _elm_lang$core$Native_Platform.incomingPort(
@@ -22096,6 +22204,34 @@ var _user$project$Scroll$Info = F3(
 		return {scrollTop: a, documentHeight: b, windowHeight: c};
 	});
 
+var _user$project$Main$viewButton = F2(
+	function (label, url) {
+		return A2(
+			_rundis$elm_bootstrap$Bootstrap_Button$linkButton,
+			{
+				ctor: '::',
+				_0: _rundis$elm_bootstrap$Bootstrap_Button$large,
+				_1: {
+					ctor: '::',
+					_0: _rundis$elm_bootstrap$Bootstrap_Button$primary,
+					_1: {
+						ctor: '::',
+						_0: _rundis$elm_bootstrap$Bootstrap_Button$attrs(
+							{
+								ctor: '::',
+								_0: _elm_lang$html$Html_Attributes$href(url),
+								_1: {ctor: '[]'}
+							}),
+						_1: {ctor: '[]'}
+					}
+				}
+			},
+			{
+				ctor: '::',
+				_0: _elm_lang$html$Html$text(label),
+				_1: {ctor: '[]'}
+			});
+	});
 var _user$project$Main$mainView = function (html) {
 	return A2(
 		_rundis$elm_bootstrap$Bootstrap_Grid$container,
@@ -22173,28 +22309,6 @@ var _user$project$Main$Index = function (a) {
 	return {ctor: 'Index', _0: a};
 };
 var _user$project$Main$decodeSources = A2(_elm_lang$core$Json_Decode$map, _user$project$Main$Index, _user$project$Sources$decode);
-var _user$project$Main$decode = function (navbar) {
-	return A3(
-		_elm_lang$core$Json_Decode$map2,
-		_user$project$Main$Model,
-		A2(
-			_elm_lang$core$Json_Decode$field,
-			'nav',
-			_user$project$Navbar$decode(navbar)),
-		_elm_lang$core$Json_Decode$oneOf(
-			A2(
-				_elm_lang$core$List$map,
-				_user$project$Main$decodePaginated,
-				{
-					ctor: '::',
-					_0: _user$project$Main$decodeSources,
-					_1: {
-						ctor: '::',
-						_0: _user$project$Main$decodeEntries,
-						_1: {ctor: '[]'}
-					}
-				})));
-};
 var _user$project$Main$appendPage = F2(
 	function (model, newPage) {
 		var _p3 = {ctor: '_Tuple2', _0: model.resource.object, _1: newPage.resource.object};
@@ -22243,6 +22357,47 @@ var _user$project$Main$appendPage = F2(
 		} while(false);
 		return model;
 	});
+var _user$project$Main$Auth = F2(
+	function (a, b) {
+		return {ctor: 'Auth', _0: a, _1: b};
+	});
+var _user$project$Main$decodeAuth = A2(
+	_elm_lang$core$Json_Decode$field,
+	'links',
+	A2(
+		_elm_lang$core$Json_Decode$field,
+		'login',
+		A3(
+			_elm_lang$core$Json_Decode$map2,
+			_user$project$Main$Auth,
+			A2(_elm_lang$core$Json_Decode$field, 'text', _elm_lang$core$Json_Decode$string),
+			A2(_elm_lang$core$Json_Decode$field, 'url', _elm_lang$core$Json_Decode$string))));
+var _user$project$Main$decode = function (navbar) {
+	return A3(
+		_elm_lang$core$Json_Decode$map2,
+		_user$project$Main$Model,
+		A2(
+			_elm_lang$core$Json_Decode$field,
+			'nav',
+			_user$project$Navbar$decode(navbar)),
+		_elm_lang$core$Json_Decode$oneOf(
+			A2(
+				_elm_lang$core$List$map,
+				_user$project$Main$decodePaginated,
+				{
+					ctor: '::',
+					_0: _user$project$Main$decodeSources,
+					_1: {
+						ctor: '::',
+						_0: _user$project$Main$decodeEntries,
+						_1: {
+							ctor: '::',
+							_0: _user$project$Main$decodeAuth,
+							_1: {ctor: '[]'}
+						}
+					}
+				})));
+};
 var _user$project$Main$ScrollMsg = function (a) {
 	return {ctor: 'ScrollMsg', _0: a};
 };
@@ -22487,6 +22642,8 @@ var _user$project$Main$view = function (_p17) {
 	var html = function () {
 		var _p19 = _p18.resource.object;
 		switch (_p19.ctor) {
+			case 'Auth':
+				return A2(_user$project$Main$viewButton, _p19._0, _p19._1);
 			case 'Index':
 				return A2(
 					_elm_lang$html$Html$map,

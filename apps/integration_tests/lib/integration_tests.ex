@@ -18,8 +18,12 @@ defmodule IntegrationTests do
     :world
   end
 
+  @session Application.get_env(:integration_tests, :session)
+
   def do_test do
     Hound.start_session()
+    navigate_to("http://localhost:4000")
+    set_cookie(%{name: "_api_key", value: @session, domain: "http://localhost:4000"})
     navigate_to("http://localhost:4000/data-sources")
     find_element(:id, "source/1") |> click()
     create_new(%{duration: "45",

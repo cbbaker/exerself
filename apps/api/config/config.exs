@@ -18,6 +18,18 @@ config :logger, :console,
   format: "$time $metadata[$level] $message\n",
   metadata: [:request_id]
 
+# auth
+config :ueberauth, Ueberauth,
+  providers: [
+    google: {Ueberauth.Strategy.Google, []}
+  ]
+
+config :ueberauth, Ueberauth.Strategy.Google.OAuth,
+  client_id: System.get_env("EXERSELF_APP_ID"),
+  client_secret: System.get_env("EXERSELF_APP_SECRET")
+
+config :api, :authorized_emails, System.get_env("EXERSELF_APP_EMAILS")
+
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 import_config "#{Mix.env}.exs"
