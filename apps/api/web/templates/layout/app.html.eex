@@ -16,13 +16,8 @@
   </head>
 
   <body>
-    <div class="container">
-      <main role="main">
-        <div id="main"></div>
-
-        <%= render @view_module, @view_template, assigns %>
-      </main>
-    </div> <!-- /container -->
+    <div id="main"></div>
+    <%= render @view_module, @view_template, assigns %>
     <script src="<%= static_path(@conn, "/js/app.js") %>"></script>
     <script>
       var node = document.getElementById('main');
