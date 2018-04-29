@@ -8,6 +8,8 @@ defmodule Api.DataSourceControllerTest do
     "editors" => []
   }
 
+  @user %{email: "test@gmail.com", name: "bob"}
+
   setup do
     Repo.TestLog.reset()
     Repo.create_table("data_sources")
@@ -36,7 +38,7 @@ defmodule Api.DataSourceControllerTest do
 
 
   describe "when logged in" do
-    setup %{conn: conn}, do: {:ok, conn: assign(conn, :current_user, "test@gmail.com")}
+    setup %{conn: conn}, do: {:ok, conn: assign(conn, :current_user, @user)}
 
     test "lists data sources", %{conn: conn} do
       conn = get conn, data_source_path(conn, :index)

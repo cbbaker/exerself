@@ -30,6 +30,4 @@ use Mix.Config
 #     import_config "#{Mix.env}.exs"
 
 config :import,
-  exerself_url: "https://exerself.herokuapp.com",
-  exerself_user: System.get_env("EXERSELF_USER"),
-  exerself_password: System.get_env("EXERSELF_PASSWORD")
+  exerself_url: "https://exerself.herokuapp.com"

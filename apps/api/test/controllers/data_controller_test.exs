@@ -3,6 +3,7 @@ defmodule Api.DataControllerTest do
 
   @valid_attrs %{"datum" => "blah"}
   # @invalid_attrs %{}
+  @user %{email: "test@gmail.com", name: "bob"}
 
   setup do
     Repo.TestLog.reset()
@@ -39,7 +40,7 @@ defmodule Api.DataControllerTest do
   end
 
   describe "when logged in" do
-    setup %{conn: conn}, do: {:ok, conn: assign(conn, :current_user, "test@gmail.com")}
+    setup %{conn: conn}, do: {:ok, conn: assign(conn, :current_user, @user)}
 
     test "shows the resource", %{conn: conn, name: name} do
       entry = DataSource.create_entry(name, %{})
