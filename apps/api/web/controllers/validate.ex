@@ -6,7 +6,6 @@ defmodule Api.Validate do
   end
 
   def valid(%{email: email} = info) do
-    IO.puts("got email: #{email}")
     if Enum.member?(@authorized_emails, email) do
       {:ok, info}
     else

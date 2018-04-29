@@ -11,6 +11,10 @@ defmodule Repo.TestLog do
     GenServer.stop(pid)
   end
 
+  def init(args) do
+    {:ok, args}
+  end
+
   def write(pid, term) do
     GenServer.cast(pid, {:write, term})
   end
