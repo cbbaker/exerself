@@ -5,9 +5,9 @@ defmodule Import do
     Application.get_env(:import, :exerself_url) <> path
   end
 
-  def import() do
+  def import(email, password) do
     Repo.create_table("data_sources")
-    cookies = sign_in()
+    cookies = sign_in(email, password)
     get_stationary_bike_rides(cookies) |> import_stationary_bike_rides()
     get_road_bike_rides(cookies) |> import_road_bike_rides()
   end
@@ -19,9 +19,7 @@ defmodule Import do
     {token, cookies}
   end
 
-  def sign_in() do
-    email = Application.get_env(:import, :exerself_user)
-    password = Application.get_env(:import, :exerself_password)
+  def sign_in(email, password) do
     {token, cookies} = get_token()
     form = [{"user[email]", email},
             {"user[password]", password},

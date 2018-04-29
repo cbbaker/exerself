@@ -23,7 +23,7 @@ defmodule Api.Mixfile do
     [mod: {Api, []},
      applications: [
        :phoenix, :phoenix_pubsub, :phoenix_html, :cowboy, :logger, :gettext,
-       :ueberauth_google
+       :ueberauth_google, :runtime_tools, :observer, :wx
      ]
     ]
   end
