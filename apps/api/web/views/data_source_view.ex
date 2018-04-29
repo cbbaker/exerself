@@ -61,7 +61,7 @@ defmodule Api.DataSourceView do
     }
   end
 
-  def show_nav(%{assigns: %{current_user: %{name: name}}} = conn, data_sources, current) do
+  def show_nav(%{assigns: %{current_user: info}} = conn, data_sources, current) do
     %{ 
       brand: "Exerself",
       menus: [
@@ -78,7 +78,7 @@ defmodule Api.DataSourceView do
         }
       ],
       auth: %{
-        name: name,
+        info: info,
         url: auth_path(conn, :delete)
       }
     }
