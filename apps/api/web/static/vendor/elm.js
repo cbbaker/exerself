@@ -18565,7 +18565,7 @@ var _rundis$elm_bootstrap$Bootstrap_Navbar$renderNav = F3(
 			_elm_lang$html$Html$ul,
 			{
 				ctor: '::',
-				_0: _elm_lang$html$Html_Attributes$class('navbar-nav mr-auto'),
+				_0: _elm_lang$html$Html_Attributes$class('navbar-nav mr-auto my-auto'),
 				_1: {ctor: '[]'}
 			},
 			A2(
