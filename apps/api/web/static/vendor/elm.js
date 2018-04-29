@@ -21901,6 +21901,15 @@ var _user$project$Navbar$MenuLink = F3(
 	function (a, b, c) {
 		return {name: a, uri: b, active: c};
 	});
+var _user$project$Navbar$Info = F2(
+	function (a, b) {
+		return {name: a, image: b};
+	});
+var _user$project$Navbar$decodeInfo = A3(
+	_elm_lang$core$Json_Decode$map2,
+	_user$project$Navbar$Info,
+	A2(_elm_lang$core$Json_Decode$field, 'name', _elm_lang$core$Json_Decode$string),
+	A2(_elm_lang$core$Json_Decode$field, 'image', _elm_lang$core$Json_Decode$string));
 var _user$project$Navbar$Model = F4(
 	function (a, b, c, d) {
 		return {brand: a, menus: b, auth: c, state: d};
@@ -21955,7 +21964,7 @@ var _user$project$Navbar$decodeLoggedIn = A2(
 	A3(
 		_elm_lang$core$Json_Decode$map2,
 		_user$project$Navbar$LoggedIn,
-		A2(_elm_lang$core$Json_Decode$field, 'name', _elm_lang$core$Json_Decode$string),
+		A2(_elm_lang$core$Json_Decode$field, 'info', _user$project$Navbar$decodeInfo),
 		A2(_elm_lang$core$Json_Decode$field, 'url', _elm_lang$core$Json_Decode$string)));
 var _user$project$Navbar$decodeAuth = _elm_lang$core$Json_Decode$oneOf(
 	{
@@ -22012,6 +22021,7 @@ var _user$project$Navbar$view = function (_p5) {
 	var viewAuth = function (auth) {
 		var _p7 = auth;
 		if (_p7.ctor === 'LoggedIn') {
+			var _p8 = _p7._0;
 			return A2(
 				_rundis$elm_bootstrap$Bootstrap_Navbar$textItem,
 				{ctor: '[]'},
@@ -22032,37 +22042,60 @@ var _user$project$Navbar$view = function (_p5) {
 							{ctor: '[]'},
 							{
 								ctor: '::',
-								_0: _elm_lang$html$Html$text(_p7._0),
+								_0: _elm_lang$html$Html$text(_p8.name),
 								_1: {ctor: '[]'}
 							}),
 						_1: {
 							ctor: '::',
 							_0: A2(
-								_rundis$elm_bootstrap$Bootstrap_Button$linkButton,
+								_elm_lang$html$Html$img,
 								{
 									ctor: '::',
-									_0: _rundis$elm_bootstrap$Bootstrap_Button$secondary,
+									_0: _elm_lang$html$Html_Attributes$src(_p8.image),
 									_1: {
 										ctor: '::',
-										_0: _rundis$elm_bootstrap$Bootstrap_Button$attrs(
-											{
+										_0: _elm_lang$html$Html_Attributes$width(60),
+										_1: {
+											ctor: '::',
+											_0: _elm_lang$html$Html_Attributes$height(60),
+											_1: {
 												ctor: '::',
-												_0: _elm_lang$html$Html_Attributes$class('ml-2'),
-												_1: {
-													ctor: '::',
-													_0: _elm_lang$html$Html_Attributes$href(_p7._1),
-													_1: {ctor: '[]'}
-												}
-											}),
-										_1: {ctor: '[]'}
+												_0: _elm_lang$html$Html_Attributes$class('rounded-circle ml-2'),
+												_1: {ctor: '[]'}
+											}
+										}
 									}
 								},
-								{
-									ctor: '::',
-									_0: _elm_lang$html$Html$text('sign out'),
-									_1: {ctor: '[]'}
-								}),
-							_1: {ctor: '[]'}
+								{ctor: '[]'}),
+							_1: {
+								ctor: '::',
+								_0: A2(
+									_rundis$elm_bootstrap$Bootstrap_Button$linkButton,
+									{
+										ctor: '::',
+										_0: _rundis$elm_bootstrap$Bootstrap_Button$secondary,
+										_1: {
+											ctor: '::',
+											_0: _rundis$elm_bootstrap$Bootstrap_Button$attrs(
+												{
+													ctor: '::',
+													_0: _elm_lang$html$Html_Attributes$class('ml-2'),
+													_1: {
+														ctor: '::',
+														_0: _elm_lang$html$Html_Attributes$href(_p7._1),
+														_1: {ctor: '[]'}
+													}
+												}),
+											_1: {ctor: '[]'}
+										}
+									},
+									{
+										ctor: '::',
+										_0: _elm_lang$html$Html$text('sign out'),
+										_1: {ctor: '[]'}
+									}),
+								_1: {ctor: '[]'}
+							}
 						}
 					}
 				});
@@ -22085,12 +22118,12 @@ var _user$project$Navbar$view = function (_p5) {
 		}
 	};
 	var viewEntry = function (entry) {
-		var _p8 = entry;
-		if (_p8.ctor === 'SubMenu') {
-			var _p10 = _p8._0;
+		var _p9 = entry;
+		if (_p9.ctor === 'SubMenu') {
+			var _p11 = _p9._0;
 			var viewItem = function (menuEntry) {
-				var _p9 = menuEntry;
-				if (_p9.ctor === 'Item') {
+				var _p10 = menuEntry;
+				if (_p10.ctor === 'Item') {
 					return {
 						ctor: '::',
 						_0: A2(
@@ -22098,12 +22131,12 @@ var _user$project$Navbar$view = function (_p5) {
 							{
 								ctor: '::',
 								_0: _elm_lang$html$Html_Events$onClick(
-									_user$project$Navbar$Click(_p9._0.uri)),
+									_user$project$Navbar$Click(_p10._0.uri)),
 								_1: {ctor: '[]'}
 							},
 							{
 								ctor: '::',
-								_0: _elm_lang$html$Html$text(_p9._0.name),
+								_0: _elm_lang$html$Html$text(_p10._0.name),
 								_1: {ctor: '[]'}
 							}),
 						_1: {ctor: '[]'}
@@ -22114,43 +22147,43 @@ var _user$project$Navbar$view = function (_p5) {
 			};
 			return _rundis$elm_bootstrap$Bootstrap_Navbar$dropdown(
 				{
-					id: _p10,
+					id: _p11,
 					toggle: A2(
 						_rundis$elm_bootstrap$Bootstrap_Navbar$dropdownToggle,
 						{ctor: '[]'},
 						{
 							ctor: '::',
-							_0: _elm_lang$html$Html$text(_p10),
+							_0: _elm_lang$html$Html$text(_p11),
 							_1: {ctor: '[]'}
 						}),
-					items: A2(_elm_lang$core$List$concatMap, viewItem, _p8._1)
+					items: A2(_elm_lang$core$List$concatMap, viewItem, _p9._1)
 				});
 		} else {
-			var _p12 = _p8._0.uri;
-			var _p11 = _p8._0.name;
-			return _p8._0.active ? A2(
+			var _p13 = _p9._0.uri;
+			var _p12 = _p9._0.name;
+			return _p9._0.active ? A2(
 				_rundis$elm_bootstrap$Bootstrap_Navbar$itemLinkActive,
 				{
 					ctor: '::',
 					_0: _elm_lang$html$Html_Events$onClick(
-						_user$project$Navbar$Click(_p12)),
+						_user$project$Navbar$Click(_p13)),
 					_1: {ctor: '[]'}
 				},
 				{
 					ctor: '::',
-					_0: _elm_lang$html$Html$text(_p11),
+					_0: _elm_lang$html$Html$text(_p12),
 					_1: {ctor: '[]'}
 				}) : A2(
 				_rundis$elm_bootstrap$Bootstrap_Navbar$itemLink,
 				{
 					ctor: '::',
 					_0: _elm_lang$html$Html_Events$onClick(
-						_user$project$Navbar$Click(_p12)),
+						_user$project$Navbar$Click(_p13)),
 					_1: {ctor: '[]'}
 				},
 				{
 					ctor: '::',
-					_0: _elm_lang$html$Html$text(_p11),
+					_0: _elm_lang$html$Html$text(_p12),
 					_1: {ctor: '[]'}
 				});
 		}
