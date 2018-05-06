@@ -48,7 +48,7 @@ defmodule Import do
       [
         %{row:
           [
-            [%{tag: "variable", name: "started_at"}],
+            [%{tag: "date", name: "started_at", format: "%Y-%m-%d"}],
             [%{tag: "variable", name: "duration"},
              %{tag: "string", text: " min"}]
           ]
@@ -130,7 +130,7 @@ defmodule Import do
       [
         %{row:
           [
-            [%{tag: "variable", name: "started_at"}]
+            [%{tag: "date", name: "started_at", format: "%Y-%m-%d"}]
           ]},
         %{row:
           [
