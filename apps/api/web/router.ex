@@ -15,6 +15,10 @@ defmodule Api.Router do
     plug Api.Auth
   end
 
+  pipeline :authorized do
+    plug Guardian.Plug.EnsureAuthenticated
+  end
+
   scope "/auth", Api do
     pipe_through :browser
 
@@ -28,6 +32,10 @@ defmodule Api.Router do
     pipe_through :browser # Use the default browser stack
 
     get "/", PageController, :index
+  end
+
+  scope "/", Api do
+    pipe_through [:browser, :authorized] # Use the default browser stack
 
     get "/data-sources", DataSourceController, :static
     get "/data-sources/:data_source", DataController, :static
@@ -35,7 +43,7 @@ defmodule Api.Router do
 
   # Other scopes may use custom stacks.
   scope "/api", Api do
-    pipe_through :api
+    pipe_through [:api, :authorized]
 
     resources "/data-sources", DataSourceController, only: [:index, :create, :show, :delete] do
       resources "/data", DataController, only: [:show, :create, :update, :delete]

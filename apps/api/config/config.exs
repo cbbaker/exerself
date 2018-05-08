@@ -28,6 +28,10 @@ config :ueberauth, Ueberauth.Strategy.Google.OAuth,
   client_id: System.get_env("EXERSELF_APP_ID"),
   client_secret: System.get_env("EXERSELF_APP_SECRET")
 
+config :api, Api.Guardian,
+  issuer: "Exerself",
+  secret_key: System.get_env("EXERSELF_TOKEN_SECRET")
+
 config :api, :authorized_emails, System.get_env("EXERSELF_APP_EMAILS")
 
 # Import environment specific config. This must remain at the bottom

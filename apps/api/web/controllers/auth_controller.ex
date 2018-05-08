@@ -1,5 +1,6 @@
 defmodule Api.AuthController do
   alias Api.Validate
+  alias Api.Guardian
 
   use Api.Web, :controller
   plug Ueberauth
@@ -10,22 +11,19 @@ defmodule Api.AuthController do
     |> redirect(to: "/")
   end
 
-  def callback(%{assigns: %{ueberauth_auth: auth}} = conn, _params) do
+  def callback(%{assigns: %{ueberauth_auth: %{info: %{name: name, email: email, image: image}}}} = conn,
+                 _params) do
     IO.puts "google callback: #{inspect auth.info}"
+    conn = Guardian.Plug.sign_in(conn, %{name: name, email: email, image: image})
     case Validate.valid(auth) do
       {:ok, info} ->
-        conn
-        |> put_flash(:info, "Successfully authenticated.")
-        |> put_session(:current_user, info)
-        |> redirect(to: data_source_path(conn, :static))
+        redirect(conn, to: data_source_path(conn, :static))
       {:error, reason} ->
-        conn
-        |> put_flash(:error, reason)
-        |> redirect(to: "/")
+        redirect(conn, to: "/")
     end
   end
 
   def delete(conn, _params) do
-    conn |> put_session(:current_user, nil) |> redirect(to: page_path(conn, :index))
+    conn |> Guardian.Plug.sign_out() |> redirect(to: page_path(conn, :index))
   end
 end
