@@ -1,0 +1,7 @@
+<%= form_for @conn, auth_path(@conn, :test_login), [as: :auth], fn f -> %>
+  <%= text_input f, :email %>                                                           
+  <%= text_input f, :name %>                                                           
+  <%= text_input f, :image %>                                                           
+  <%= password_input f, :password %>                                                           
+  <%= submit "Submit" %>
+<% end %>

@@ -4,6 +4,26 @@ defmodule Api.AuthController do
   use Api.Web, :controller
   plug Ueberauth
 
+  @test_password Application.get_env(:api, :test_password)
+
+  def test_form(conn, _params) do
+    render(conn, "test_form.html")
+  end
+
+  def test_login(conn, %{"auth" => %{"email" => email,
+                                     "name" => name,
+                                     "image" => image,
+                                     "password" => password}}) do
+    if password == @test_password do
+      conn
+      |> put_session(:current_user, %{email: email, name: name, image: image})
+      |> redirect(to: data_source_path(conn, :static))
+    else
+      conn
+      |> redirect(to: "/")
+    end
+  end
+
   def callback(%{assigns: %{ueberauth_failure: _fails}} = conn, _params) do
     conn
     |> put_flash(:error, "Failed to authenticate.")
