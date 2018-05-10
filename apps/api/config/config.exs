@@ -30,6 +30,8 @@ config :ueberauth, Ueberauth.Strategy.Google.OAuth,
 
 config :api, :authorized_emails, System.get_env("EXERSELF_APP_EMAILS")
 
+config :api, :test_password, System.get_env("EXERSELF_TEST_PASSWORD")
+
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 import_config "#{Mix.env}.exs"
