@@ -6,6 +6,26 @@ defmodule DataSource do
   application. It uses the Repo to store data and metadata.
   """
 
+  @page_size 20
+  def all() do
+    Stream.resource(
+      fn -> Repo.list_entries("data_sources", @page_size + 1) end,
+      fn
+        (page) when is_nil(page) ->
+          {:halt, nil}
+        (page) ->
+          retval = Enum.take(page, @page_size)
+          if Enum.count(page) > @page_size do
+            {get_names(retval),
+             Repo.list_entries("data_sources", @page_size + 1, List.last(retval).id)}
+          else
+            {get_names(retval), nil}
+          end
+      end,
+      fn _ -> nil end
+    )
+  end
+
   @doc """
   List data sources.
 
@@ -16,13 +36,15 @@ defmodule DataSource do
 
   """
   def list(count, last) do
-    Repo.list_entries("data_sources", count, last) |>
-      Enum.map(&(&1.name))
+    Repo.list_entries("data_sources", count, last) |> get_names()
   end
 
   def list(count) do
-    Repo.list_entries("data_sources", count) |>
-      Enum.map(&(&1.name))
+    Repo.list_entries("data_sources", count) |> get_names()
+  end
+
+  defp get_names(entries) do
+    Enum.map(entries, &(&1.name))
   end
 
   def create(name, schema, viewers, editors) do

@@ -2,14 +2,37 @@ defmodule DataSourceTest do
   use ExUnit.Case
   doctest DataSource
 
-  setup do
-    Repo.TestLog.reset()
-    Repo.create_table("data_sources")
+  defp sleep() do
     Process.sleep(10)
   end
 
+  setup do
+    Repo.TestLog.reset()
+    Repo.create_table("data_sources")
+    sleep()
+    :ok
+  end
+
+  defp create_fixtures(%{create_count: create_count}) do
+    IO.puts "create_count: #{create_count}"
+    1..create_count |> Enum.each(fn i -> DataSource.create("test#{i}", %{"startedAt" => "date"}, [], []) end)
+    :ok
+  end
+
+  defp create_fixtures(_) do
+    :ok
+  end
+
+  setup :create_fixtures
+
+  @tag create_count: 50
+  test "streams the data sources" do
+    assert DataSource.all() |> Enum.count() == 50
+  end
+
+  @tag create_count: 10
   test "lists the data sources" do
-    assert DataSource.list(5) == []
+    assert DataSource.list(5) |> Enum.count() == 5
   end
 
   test "adds a data source" do
