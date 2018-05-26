@@ -1,6 +1,8 @@
 defmodule Api.DataControllerTest do
   use Api.ConnCase
 
+  require Repo
+
   @valid_attrs %{"datum" => "blah"}
   # @invalid_attrs %{}
   @user %{email: "test@gmail.com", name: "bob"}
@@ -13,8 +15,7 @@ defmodule Api.DataControllerTest do
     schema = %{"datum" => "string"}
     viewers = []
     editors = []
-    DataSource.create(name, schema, viewers, editors)
-    Process.sleep(10)
+    Repo.blocking do: DataSource.create(name, schema, viewers, editors)
 
     {:ok, name: name, schema: schema, viewers: viewers, editors: editors}
   end
@@ -49,9 +50,8 @@ defmodule Api.DataControllerTest do
     end
 
     test "creates and renders resource when data is valid", %{conn: conn, name: name} do
-      conn = post conn, data_source_data_path(conn, :create, name), data: @valid_attrs
+      conn = Repo.blocking do: post conn, data_source_data_path(conn, :create, name), data: @valid_attrs
       assert json_response(conn, 201)["uri"]
-      Process.sleep(10)
       assert [%{"datum" => "blah"}] = DataSource.get_entries(name, 100)
     end
 

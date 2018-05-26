@@ -17,16 +17,16 @@ defmodule Api.DataSourceController do
 
   def static(conn, _params, _current_user) do
     data_sources = DataSource.list(100)
-    render(conn, "index.html", data_sources: data_sources)
+    render(conn, "index.html", data_sources: Enum.take(data_sources, 20))
   end
 
   def index(conn, _params, _current_user) do
     data_sources = DataSource.list(100)
-    render(conn, "index.json", data_sources: data_sources)
+    render(conn, "index.json", data_sources: Enum.take(data_sources, 20))
   end
 
   def show(conn, %{"id" => name} = params, _current_user) do
-    data_sources = DataSource.list(1000)
+    data_sources = DataSource.all()
     if !Enum.member?(data_sources, name) do
       raise Api.NotFound
     end
@@ -39,14 +39,14 @@ defmodule Api.DataSourceController do
       entries: Pagination.get_entries(name, params)
     }
     
-    render(conn, "show.json", data_source: data_source, data_sources: data_sources)
+    render(conn, "show.json", data_source: data_source, data_sources: Enum.take(data_sources, 20))
   end
 
   def create(conn, %{"data_source" => %{"name" => name,
                                         "schema" => schema,
                                         "viewers" => viewers,
                                         "editors" => editors}}, _current_user) do
-    data_sources = DataSource.list(1000)
+    data_sources = DataSource.list(20)
     DataSource.create(name, schema, viewers, editors)
     data_source = %{
       name: name,

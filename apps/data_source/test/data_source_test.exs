@@ -2,19 +2,15 @@ defmodule DataSourceTest do
   use ExUnit.Case
   doctest DataSource
 
-  defp sleep() do
-    Process.sleep(10)
-  end
+  require Repo
 
   setup do
     Repo.TestLog.reset()
-    Repo.create_table("data_sources")
-    sleep()
+    Repo.blocking do: Repo.create_table("data_sources")
     :ok
   end
 
   defp create_fixtures(%{create_count: create_count}) do
-    IO.puts "create_count: #{create_count}"
     1..create_count |> Enum.each(fn i -> DataSource.create("test#{i}", %{"startedAt" => "date"}, [], []) end)
     :ok
   end
@@ -36,52 +32,50 @@ defmodule DataSourceTest do
   end
 
   test "adds a data source" do
-    DataSource.create("test", %{}, [], [])
+    Repo.blocking do: DataSource.create("test", %{}, [], [])
     assert DataSource.list(5) == ["test"]
   end
 
   test "gets the schema" do
-    DataSource.create("test", %{"startedAt" => "date"}, [], [])
+    Repo.blocking do: DataSource.create("test", %{"startedAt" => "date"}, [], [])
     assert %{"startedAt" => "date"} = DataSource.get_schema("test")
   end
 
   test "gets the viewers" do
-    DataSource.create("test", %{}, [%{"viewer1" => "stuff"}], [])
+    Repo.blocking do: DataSource.create("test", %{}, [%{"viewer1" => "stuff"}], [])
     assert [%{"viewer1" => "stuff"}] = DataSource.get_viewers("test")
   end
 
   test "gets the editors" do
-    DataSource.create("test", %{}, [], [%{"editor1" => "stuff"}])
+    Repo.blocking do: DataSource.create("test", %{}, [], [%{"editor1" => "stuff"}])
     assert [%{"editor1" => "stuff"}] = DataSource.get_editors("test")
   end
 
   test "gets the entries" do
-    DataSource.create("test", %{"field" => "int"}, [], [])
+    Repo.blocking do: DataSource.create("test", %{"field" => "int"}, [], [])
     assert DataSource.get_entries("test", 100) == []
   end
 
   test "creates an entry" do
     DataSource.create("test", %{"field" => "int"}, [], [])
-    entry = DataSource.create_entry("test", %{"field" => 3})
+    entry = Repo.blocking do: DataSource.create_entry("test", %{"field" => 3})
     assert [^entry] = DataSource.get_entries("test", 100)
   end
 
   test "updates an entry" do
     DataSource.create("test", %{"field" => "int"}, [], [])
-    entry = DataSource.create_entry("test", %{"field" => 3})
+    entry = Repo.blocking do: DataSource.create_entry("test", %{"field" => 3})
     assert [^entry] = DataSource.get_entries("test", 100)
     new_entry = Map.put(entry, "field", 4)
-    DataSource.update_entry("test", new_entry)
-    Process.sleep(10)
+    Repo.blocking do: DataSource.update_entry("test", new_entry)
     assert [^new_entry] = DataSource.get_entries("test", 100)
   end
 
   test "deletes an entry" do
     DataSource.create("test", %{"field" => "int"}, [], [])
-    entry = DataSource.create_entry("test", %{"field" => 3})
+    entry = Repo.blocking do: DataSource.create_entry("test", %{"field" => 3})
     assert [^entry] = DataSource.get_entries("test", 100)
-    DataSource.delete_entry("test", entry)
-    Process.sleep(10)
+    Repo.blocking do: DataSource.delete_entry("test", entry)
     assert [] = DataSource.get_entries("test", 100)
   end
 end

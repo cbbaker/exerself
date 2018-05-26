@@ -1,4 +1,6 @@
 defmodule DataSource do
+  require Repo
+
   @moduledoc """
   Documentation for DataSource.
 
@@ -53,9 +55,7 @@ defmodule DataSource do
     Repo.create_table(schema_table_name(name))
     Repo.create_table(viewers_table_name(name))
     Repo.create_table(editors_table_name(name))
-    Repo.create_table(entries_table_name(name))
-
-    Process.sleep(10)
+    Repo.blocking do: Repo.create_table(entries_table_name(name))
 
     Repo.create_entry(schema_table_name(name), schema)
     Enum.each(viewers, &(Repo.create_entry(viewers_table_name(name), &1)))

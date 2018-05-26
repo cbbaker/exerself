@@ -59,4 +59,19 @@ defmodule Repo do
   def delete_entry(table, entry) do
     EventLog.commit(:delete_entry, %{table: table, entry: entry})
   end
+
+  defmacro blocking(do: expression) do
+    quote do
+      Repo.blocking_call(fn -> unquote(expression) end)
+    end
+  end
+
+  def blocking_call(thunk) do
+    EventLog.subscribe()
+    result = thunk.()
+    receive do
+      _ -> EventLog.unsubscribe()
+    end
+    result
+  end
 end

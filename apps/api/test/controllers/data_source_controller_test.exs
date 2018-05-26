@@ -1,6 +1,8 @@
 defmodule Api.DataSourceControllerTest do
   use Api.ConnCase
 
+  require Repo
+
   @valid_attrs %{
     "name" => "test",
     "schema" => %{},
@@ -12,8 +14,7 @@ defmodule Api.DataSourceControllerTest do
 
   setup do
     Repo.TestLog.reset()
-    Repo.create_table("data_sources")
-    Process.sleep(10)
+    Repo.blocking do: Repo.create_table("data_sources")
   end
 
   defp setup_headers(%{conn: conn, accept: accept}), do: {:ok, conn: put_req_header(conn, "accept", accept)}
