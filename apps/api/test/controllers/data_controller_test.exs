@@ -62,7 +62,7 @@ defmodule Api.DataControllerTest do
 
     test "updates and renders chosen resource when data is valid", %{conn: conn, name: name} do
       data = DataSource.create_entry(name, %{})
-      conn = put conn, data_source_data_path(conn, :update, name, data.id), data: @valid_attrs
+      conn = Repo.blocking do: put conn, data_source_data_path(conn, :update, name, data.id), data: @valid_attrs
       assert json_response(conn, 200)["uri"]
       assert [%{"datum" => "blah"}] = DataSource.get_entries(name, 100)
     end
@@ -75,7 +75,7 @@ defmodule Api.DataControllerTest do
 
     test "deletes chosen resource", %{conn: conn, name: name} do
       data = DataSource.create_entry(name, %{})
-      conn = delete conn, data_source_data_path(conn, :delete, name, data.id)
+      conn = Repo.blocking do: delete conn, data_source_data_path(conn, :delete, name, data.id)
       assert response(conn, 204)
       assert DataSource.get_entries(name, 100) == []
     end

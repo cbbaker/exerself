@@ -21,6 +21,13 @@ defmodule DataSourceTest do
 
   setup :create_fixtures
 
+  # test "creates or updates a user" do
+  #   email = "test@test.com"
+  #   stuff = "nonsense"
+  #   assert %{id: 1, email: ^email, stuff: ^stuff} =
+  #     DataSource.create_or_update_user(%{email: email, stuff: stuff})
+  # end
+
   @tag create_count: 50
   test "streams the data sources" do
     assert DataSource.all() |> Enum.count() == 50

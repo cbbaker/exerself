@@ -8,6 +8,10 @@ defmodule DataSource do
   application. It uses the Repo to store data and metadata.
   """
 
+  def create_or_update_user(%{email: email} = info) do
+    
+  end
+
   @page_size 20
   def all() do
     Stream.resource(
