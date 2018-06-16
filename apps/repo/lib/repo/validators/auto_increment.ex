@@ -1,28 +1,25 @@
 defmodule Repo.Validators.AutoIncrement do
   use GenServer
 
-  def start_link() do
-    GenServer.start_link(__MODULE__, 1)
+  alias Repo.Aggregates.Table
+
+  def start_link(table) do
+    GenServer.start_link(__MODULE__, table)
   end
 
   def stop(pid) do
     GenServer.stop(pid)
   end
 
-  def init(args) do
-    {:ok, args}
-  end
-
-  def set_next_id(pid, value) do
-    GenServer.cast(pid, {:set_next_id, value})
+  def init(table) do
+    max_id = Table.stream(table) |>
+      Enum.map(&(&1.id)) |>
+      Enum.max(fn -> 0 end)
+    {:ok, max_id + 1}
   end
 
   def create(pid, table, entry) do
     GenServer.call(pid, {:create, table, entry})
-  end
-
-  def handle_cast({:set_next_id, value}, _next_id) do
-    {:noreply, value}
   end
 
   def handle_call({:create, table, entry}, _from, next_id) do

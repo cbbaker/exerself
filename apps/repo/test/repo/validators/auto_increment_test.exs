@@ -1,19 +1,17 @@
 defmodule Repo.Validators.AutoIncrementTest do
   use ExUnit.Case
 
+  alias Repo.Aggregates.Table
   alias Repo.Validators.AutoIncrement
 
   setup do
-    {:ok, pid} = AutoIncrement.start_link()
+    {:ok, table} = Table.start_link()
+    Enum.each((1..10), fn id -> Table.create(table, %{id: id}) end)
+    {:ok, pid} = AutoIncrement.start_link(table)
     [pid: pid]
   end
 
   test "adds the next id to the entry", %{pid: pid} do
-    assert %{id: 1} = AutoIncrement.create(pid, "blah", %{})
-  end
-
-  test "sets the next id", %{pid: pid} do
-    AutoIncrement.set_next_id(pid, 10)
-    assert %{id: 10} = AutoIncrement.create(pid, "blah", %{})
+    assert %{id: 11} = AutoIncrement.create(pid, "blah", %{})
   end
 end

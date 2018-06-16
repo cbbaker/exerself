@@ -39,7 +39,7 @@ defmodule Repo.Aggregates.TableList do
 
   def process({:create_table, %{name: name}}, {tables, validators}) do
     {:ok, table} = Table.start_link()
-    {:ok, validator} = AutoIncrement.start_link()
+    {:ok, validator} = AutoIncrement.start_link(table)
     {Map.put(tables, name, table), Map.put(validators, name, validator)}
   end
 
@@ -72,17 +72,7 @@ defmodule Repo.Aggregates.TableList do
   
   defp replay_log(%{logger: logger, log: log, tables: tables, validators: validators}) do
     logger.get_terms(log) |>
-      Enum.reduce({tables, validators}, &process/2) |> 
-      init_next_ids()
-  end
-
-  defp init_next_ids({tables, validators}) do
-    Map.keys(tables) |>
-      Enum.each(fn table ->
-        next_id = Table.compute_next_id(Map.get(tables, table))
-        AutoIncrement.set_next_id(Map.get(validators, table), next_id)
-      end)
-    {tables, validators}
+      Enum.reduce({tables, validators}, &process/2)
   end
 
   def handle_call(:get, _from, state) do
