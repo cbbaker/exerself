@@ -3,7 +3,7 @@ defmodule Repo.Aggregates.TableList do
 
   alias Repo.EventLog
   alias Repo.Aggregates.Table
-  alias Repo.Validators.AutoIncrement
+  alias Repo.Validator
 
   defstruct [:logger, :log, :tables, :validators]
 
@@ -37,9 +37,15 @@ defmodule Repo.Aggregates.TableList do
     IO.puts("terminate: #{inspect reason} #{inspect self()}")
   end
 
+  def process({:create_table, %{name: name, validator: validator_name}}, {tables, validators}) do
+    {:ok, table} = Table.start_link()
+    {:ok, validator} = apply(String.to_existing_atom(validator_name), :start_link, [name, table])
+    {Map.put(tables, name, table), Map.put(validators, name, validator)}
+  end
+
   def process({:create_table, %{name: name}}, {tables, validators}) do
     {:ok, table} = Table.start_link()
-    {:ok, validator} = AutoIncrement.start_link(table)
+    {:ok, validator} = Repo.Validators.AutoIncrement.start_link(name, table)
     {Map.put(tables, name, table), Map.put(validators, name, validator)}
   end
 
@@ -47,7 +53,7 @@ defmodule Repo.Aggregates.TableList do
     {table, new_tables} = Map.pop(tables, name)
     Table.stop(table)
     {validator, new_validators} = Map.pop(validators, name)
-    AutoIncrement.stop(validator)
+    Validator.stop(validator)
     {new_tables, new_validators}
   end
 
@@ -89,7 +95,7 @@ defmodule Repo.Aggregates.TableList do
 
   def handle_call(:reset, _from, state) do
     Enum.each(state.validators, fn {_name, validator} ->
-      AutoIncrement.stop(validator) 
+      Validator.stop(validator) 
     end)
     Enum.each(state.tables, fn {_name, table} ->
       Table.stop(table)

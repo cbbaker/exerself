@@ -1,30 +1,40 @@
 defmodule Repo.Validators.AutoIncrement do
-  use GenServer
 
-  alias Repo.Aggregates.Table
+  defstruct [:pid, :name]
 
-  def start_link(table) do
-    GenServer.start_link(__MODULE__, table)
+  def start_link(name, table) do
+    {:ok, pid} = Repo.Validators.AutoIncrement.Server.start_link(table)
+    {:ok, %Repo.Validators.AutoIncrement{pid: pid, name: name}}
   end
 
-  def stop(pid) do
-    GenServer.stop(pid)
-  end
+  defmodule Server do
+    use GenServer
 
-  def init(table) do
-    max_id = Table.stream(table) |>
-      Enum.map(&(&1.id)) |>
-      Enum.max(fn -> 0 end)
-    {:ok, max_id + 1}
-  end
+    alias Repo.Aggregates.Table
 
-  def create(pid, table, entry) do
-    GenServer.call(pid, {:create, table, entry})
-  end
+    defstruct [:next_id]
 
-  def handle_call({:create, table, entry}, _from, next_id) do
-    entry = Map.put(entry, :id, next_id)
-    Repo.EventLog.commit(:create_entry, %{table: table, entry: entry})
-    {:reply, entry, next_id + 1}
+    def start_link(table) do
+      GenServer.start_link(__MODULE__, table)
+    end
+
+    def init(table) do
+      max_id = Table.stream(table) |>
+        Enum.map(&(&1.id)) |>
+        Enum.max(fn -> 0 end)
+      {:ok, max_id + 1}
+    end
+
+    def handle_call({:create, table, entry}, _from, next_id) do
+      entry = Map.put(entry, :id, next_id)
+      Repo.EventLog.commit(:create_entry, %{table: table, entry: entry})
+      {:reply, entry, next_id + 1}
+    end
   end
+end
+
+
+defimpl Repo.Validator, for: Repo.Validators.AutoIncrement do
+  def stop(%{pid: pid}), do: GenServer.stop(pid)
+  def create(%{pid: pid, name: name}, entry), do: GenServer.call(pid, {:create, name, entry})
 end

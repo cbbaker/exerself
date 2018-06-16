@@ -1,8 +1,8 @@
 defmodule Repo do
   alias Repo.EventLog
+  alias Repo.Validator
   alias Repo.Aggregates.TableList
   alias Repo.Aggregates.Table
-  alias Repo.Validators.AutoIncrement
 
   @moduledoc """
   EventSource-based repo for Exerself
@@ -30,8 +30,8 @@ defmodule Repo do
       :ok
 
   """
-  def create_table(name) do
-    EventLog.commit(:create_table, %{name: name})
+  def create_table(name, validator \\ Repo.Validators.AutoIncrement) do
+    EventLog.commit(:create_table, %{name: name, validator: to_string(validator)})
   end
 
   def delete_table(name) do
@@ -47,7 +47,7 @@ defmodule Repo do
   end
 
   def create_entry(table, entry) do
-    TableList.find_validator(table) |> AutoIncrement.create(table, entry)
+    TableList.find_validator(table) |> Validator.create(entry)
   end
 
   def update_entry(table, entry) do

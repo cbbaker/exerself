@@ -48,7 +48,7 @@ defmodule Repo.Aggregates.TableListTest do
   end
 
   test "creates a table entry" do
-    Repo.blocking do: Repo.create_table("blah")
+    Repo.blocking do: Repo.create_table("blah", "Elixir.Repo.Validators.AutoIncrement")
     entry = Repo.create_entry("blah", %{data: "test"})
     assert [^entry] = Repo.list_entries("blah", 5)
   end
