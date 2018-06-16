@@ -23,6 +23,10 @@ defmodule Repo.Aggregates.Table do
     GenServer.call(pid, {:list, count})
   end
 
+  def stream(pid) do
+    GenServer.call(pid, :stream)
+  end
+
   def compute_next_id(pid) do
     GenServer.call(pid, :compute_next_id)
   end
@@ -52,6 +56,10 @@ defmodule Repo.Aggregates.Table do
   def handle_call(:compute_next_id, _from, %{entries: entries} = state) do
     next_id = entries |> Enum.map(&(&1.id)) |> Enum.max(fn -> 0 end)
     {:reply, next_id + 1, state}
+  end
+
+  def handle_call(:stream, _from, %{entries: entries} = state) do
+    {:reply, entries, state}
   end
 
   def handle_cast({:create, entry}, %{entries: entries} = state) do
