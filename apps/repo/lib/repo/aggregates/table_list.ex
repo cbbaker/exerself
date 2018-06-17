@@ -37,9 +37,9 @@ defmodule Repo.Aggregates.TableList do
     IO.puts("terminate: #{inspect reason} #{inspect self()}")
   end
 
-  def process({:create_table, %{name: name, validator: validator_name}}, {tables, validators}) do
+  def process({:create_table, %{name: name, validator: validator_name, args: args}}, {tables, validators}) do
     {:ok, table} = Table.start_link()
-    {:ok, validator} = apply(String.to_existing_atom(validator_name), :start_link, [name, table])
+    {:ok, validator} = apply(String.to_existing_atom(validator_name), :start_link, [name, table] ++ args)
     {Map.put(tables, name, table), Map.put(validators, name, validator)}
   end
 

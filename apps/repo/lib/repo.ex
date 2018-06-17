@@ -30,8 +30,8 @@ defmodule Repo do
       :ok
 
   """
-  def create_table(name, validator \\ Repo.Validators.AutoIncrement) do
-    EventLog.commit(:create_table, %{name: name, validator: to_string(validator)})
+  def create_table(name, validator \\ Repo.Validators.AutoIncrement, args \\ []) do
+    EventLog.commit(:create_table, %{name: name, validator: to_string(validator), args: args})
   end
 
   def delete_table(name) do
