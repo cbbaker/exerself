@@ -6,7 +6,7 @@ defmodule Api.Validate do
   end
 
   def valid(%{email: email} = info) do
-    if Enum.member?(@authorized_emails, email) do
+    if info = DataSource.create_or_update_user(info) do
       {:ok, info}
     else
       {:error, "unauthorized"}

@@ -9,6 +9,7 @@ defmodule Api.DataControllerTest do
 
   setup do
     Repo.TestLog.reset()
+    Repo.create_table("users")
     Repo.create_table("data_sources")
 
     name = "test"

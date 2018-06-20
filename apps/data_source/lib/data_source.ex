@@ -8,8 +8,8 @@ defmodule DataSource do
   application. It uses the Repo to store data and metadata.
   """
 
-  def create_or_update_user(%{email: email} = info) do
-    
+  def create_or_update_user(info) do
+    Repo.create_entry("users", info)
   end
 
   @page_size 20

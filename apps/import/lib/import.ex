@@ -6,6 +6,7 @@ defmodule Import do
   end
 
   def import(email, password) do
+    Repo.create_table("users", Repo.Validators.Upsert, [:email])
     Repo.create_table("data_sources")
     cookies = sign_in(email, password)
     get_stationary_bike_rides(cookies) |> import_stationary_bike_rides()
