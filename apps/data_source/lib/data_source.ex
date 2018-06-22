@@ -13,7 +13,7 @@ defmodule DataSource do
   end
 
   @page_size 20
-  def all() do
+  def all(%{id: owner_id}) do
     Stream.resource(
       fn -> Repo.list_entries("data_sources", @page_size + 1) end,
       fn
@@ -22,10 +22,10 @@ defmodule DataSource do
         (page) ->
           retval = Enum.take(page, @page_size)
           if Enum.count(page) > @page_size do
-            {get_names(retval),
+            {get_names(retval, owner_id),
              Repo.list_entries("data_sources", @page_size + 1, List.last(retval).id)}
           else
-            {get_names(retval), nil}
+            {get_names(retval, owner_id), nil}
           end
       end,
       fn _ -> nil end
@@ -37,23 +37,31 @@ defmodule DataSource do
 
   ## Examples
 
-      iex> DataSource.list(100)
+      iex> DataSource.list(%{id: 1}, 100)
       []
 
   """
-  def list(count, last) do
-    Repo.list_entries("data_sources", count, last) |> get_names()
+  def list(%{id: owner_id}, count, last) do
+    Repo.list_entries("data_sources", count, last) |>
+      get_names(owner_id)
   end
 
-  def list(count) do
-    Repo.list_entries("data_sources", count) |> get_names()
+  def list(%{id: owner_id}, count) do
+    Repo.list_entries("data_sources", count) |>
+      get_names(owner_id)
   end
 
-  defp get_names(entries) do
-    Enum.map(entries, &(&1.name))
+  defp get_names(entries, owner_id) do
+    Enum.map(entries, &(&1.name)) |>
+      Enum.filter(fn
+        {_name, ^owner_id} -> true
+        _ -> false 
+      end) |>
+      Enum.map(fn {name, _} -> name end)
   end
 
-  def create(name, schema, viewers, editors) do
+  def create(owner, base_name, schema, viewers, editors) do
+    name = table_name(owner, base_name)
     Repo.create_entry("data_sources", %{name: name})
 
     Repo.create_table(schema_table_name(name))
@@ -66,39 +74,56 @@ defmodule DataSource do
     Enum.each(editors, &(Repo.create_entry(editors_table_name(name), &1)))
   end
 
-  def get_schema(name) do
-    [schema] = Repo.list_entries(schema_table_name(name), 1000)
+  def get_schema(owner, name) do
+    [schema] = table_name(owner, name) |>
+      schema_table_name() |> 
+      Repo.list_entries(1000)
     schema
   end
 
-  def get_viewers(name) do
-    Repo.list_entries(viewers_table_name(name), 1000)
+  def get_viewers(owner, name) do
+    table_name(owner, name) |>
+      viewers_table_name() |> 
+      Repo.list_entries(1000)
   end
 
-  def get_editors(name) do
-    Repo.list_entries(editors_table_name(name), 1000)
+  def get_editors(owner, name) do
+    table_name(owner, name) |>
+      editors_table_name() |> 
+      Repo.list_entries(1000)
   end
 
-  def get_entries(name, count, last) do
-    Repo.list_entries(entries_table_name(name), count, last)
+  def get_entries(owner, name, count, last) do
+    table_name(owner, name) |>
+      entries_table_name() |> 
+      Repo.list_entries(count, last)
   end
 
-  def get_entries(name, count) do
-    Repo.list_entries(entries_table_name(name), count)
+  def get_entries(owner, name, count) do
+    table_name(owner, name) |>
+      entries_table_name() |> 
+      Repo.list_entries(count)
   end
 
-  def create_entry(name, entry) do
-    Repo.create_entry(entries_table_name(name), entry)
+  def create_entry(owner, name, entry) do
+    table_name(owner, name) |>
+      entries_table_name() |>
+      Repo.create_entry(entry)
   end
 
-  def update_entry(name, entry) do
-    Repo.update_entry(entries_table_name(name), entry)
+  def update_entry(owner, name, entry) do
+    table_name(owner, name) |>
+      entries_table_name() |>
+      Repo.update_entry(entry)
   end
 
-  def delete_entry(name, entry) do
-    Repo.delete_entry(entries_table_name(name), entry)
+  def delete_entry(owner, name, entry) do
+    table_name(owner, name) |>
+      entries_table_name() |>
+      Repo.delete_entry(entry)
   end
 
+  defp table_name(%{id: owner_id}, name), do: {name, owner_id}
   defp schema_table_name(name), do: {:data_source, :schema, name}
   defp viewers_table_name(name), do: {:data_source, :viewers, name}
   defp editors_table_name(name), do: {:data_source, :editors, name}

@@ -65,7 +65,7 @@ defmodule Repo.Aggregates.TableListTest do
 
   test "deletes a table entry" do
     Repo.blocking do: Repo.create_table("blah")
-    entry = Repo.create_entry("blah", %{data: "test"})
+    entry = Repo.blocking do: Repo.create_entry("blah", %{data: "test"})
     assert [^entry] = Repo.list_entries("blah", 5)
 
     Repo.blocking do: Repo.delete_entry("blah", %{id: entry.id})

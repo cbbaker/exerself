@@ -7,10 +7,11 @@ defmodule Import do
 
   def import(email, password) do
     Repo.create_table("users", Repo.Validators.Upsert, [:email])
+    user = DataSource.create_or_update_user(%{email: email})
     Repo.create_table("data_sources")
     cookies = sign_in(email, password)
-    get_stationary_bike_rides(cookies) |> import_stationary_bike_rides()
-    get_road_bike_rides(cookies) |> import_road_bike_rides()
+    get_stationary_bike_rides(cookies) |> import_stationary_bike_rides(user)
+    get_road_bike_rides(cookies) |> import_road_bike_rides(user)
   end
 
   def get_token() do
@@ -40,12 +41,12 @@ defmodule Import do
     Poison.decode!(body)
   end
 
-  def import_stationary_bike_rides(rides) do
-    DataSource.create("stationary_bike_rides", %{"started_at" => "date",
-                                                 "duration" => "int",
-                                                 "power" => "int",
-                                                 "heart_rate" => "int",
-                                                 "notes" => "text"},
+  def import_stationary_bike_rides(rides, user) do
+    DataSource.create(user, "stationary_bike_rides", %{"started_at" => "date",
+                                                       "duration" => "int",
+                                                       "power" => "int",
+                                                       "heart_rate" => "int",
+                                                       "notes" => "text"},
       [
         %{row:
           [
@@ -119,15 +120,15 @@ defmodule Import do
         }
 
       ])
-    Enum.reverse(rides) |> Enum.map(&(DataSource.create_entry("stationary_bike_rides", &1)))
+    Enum.reverse(rides) |> Enum.map(&(DataSource.create_entry(user, "stationary_bike_rides", &1)))
   end
 
-  def import_road_bike_rides(rides) do
-    DataSource.create("road_bike_rides", %{"started_at" => "date",
-                                           "duration" => "int",
-                                           "distance" => "float",
-                                           "heart_rate" => "int",
-                                           "notes" => "text"},
+  def import_road_bike_rides(rides, user) do
+    DataSource.create(user, "road_bike_rides", %{"started_at" => "date",
+                                                 "duration" => "int",
+                                                 "distance" => "float",
+                                                 "heart_rate" => "int",
+                                                 "notes" => "text"},
       [
         %{row:
           [
@@ -198,7 +199,7 @@ defmodule Import do
         }
 
       ])
-    Enum.reverse(rides) |> Enum.map(&(DataSource.create_entry("road_bike_rides", &1)))
+    Enum.reverse(rides) |> Enum.map(&(DataSource.create_entry(user, "road_bike_rides", &1)))
   end
 
   def get_cookies(headers) do

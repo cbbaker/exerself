@@ -15,47 +15,47 @@ defmodule Api.DataController do
     not_authorized(conn, "You must be logged in to do this")
   end
 
-  def static(conn, %{"data_source" => name} = params, _current_user) do
-    data_sources = DataSource.list(1000)
+  def static(conn, %{"data_source" => name} = params, current_user) do
+    data_sources = DataSource.list(current_user, 1000)
     if !Enum.member?(data_sources, name) do
       raise Api.NotFound
     end
 
     data_source = %{
       name: name,
-      schema: DataSource.get_schema(name) |> Map.delete(:id),
-      viewers: DataSource.get_viewers(name),
-      editors: DataSource.get_editors(name),
-      entries: Pagination.get_entries(name, params)
+      schema: DataSource.get_schema(current_user, name) |> Map.delete(:id),
+      viewers: DataSource.get_viewers(current_user, name),
+      editors: DataSource.get_editors(current_user, name),
+      entries: Pagination.get_entries(current_user, name, params)
     }
     
     render(conn, "index.html", data_source: data_source, data_sources: data_sources)
   end
 
-  def create(conn, %{"data_source_id" => name, "data" => data}, _current_user) do
-    entry = DataSource.create_entry(name, data)
+  def create(conn, %{"data_source_id" => name, "data" => data}, current_user) do
+    entry = DataSource.create_entry(current_user, name, data)
     conn
     |> put_status(:created)
     |> put_resp_header("location", data_source_data_path(conn, :show, name, entry.id))
     |> render("show.json", name: name, data: entry)
   end
 
-  def show(conn, %{"id" => id_string, "data_source_id" => name}, _current_user) do
+  def show(conn, %{"id" => id_string, "data_source_id" => name}, current_user) do
     {id, _} = Integer.parse(id_string)
-    entry = DataSource.get_entries(name, 1000) |> Enum.find(&(&1.id == id))
+    entry = DataSource.get_entries(current_user, name, 1000) |> Enum.find(&(&1.id == id))
     render(conn, "show.json", name: name, data: entry)
   end
 
-  def update(conn, %{"data_source_id" => name, "id" => id_string, "data" => data_params}, _current_user) do
+  def update(conn, %{"data_source_id" => name, "id" => id_string, "data" => data_params}, current_user) do
     {id, _} = Integer.parse(id_string)
     entry = Map.put(data_params, :id, id)
-    DataSource.update_entry(name, entry)
+    DataSource.update_entry(current_user, name, entry)
     render(conn, "show.json", name: name, data: entry)
   end
 
-  def delete(conn, %{"id" => id_string, "data_source_id" => name}, _current_user) do
+  def delete(conn, %{"id" => id_string, "data_source_id" => name}, current_user) do
     {id, _} = Integer.parse(id_string)
-    DataSource.delete_entry(name, %{id: id})
+    DataSource.delete_entry(current_user, name, %{id: id})
     send_resp(conn, :no_content, "")
   end
 
