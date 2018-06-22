@@ -1,5 +1,6 @@
 defmodule Repo do
   alias Repo.EventLog
+  alias Repo.Validator
   alias Repo.Aggregates.TableList
   alias Repo.Aggregates.Table
 
@@ -29,8 +30,8 @@ defmodule Repo do
       :ok
 
   """
-  def create_table(name) do
-    EventLog.commit(:create_table, %{name: name})
+  def create_table(name, validator \\ Repo.Validators.AutoIncrement, args \\ []) do
+    EventLog.commit(:create_table, %{name: name, validator: to_string(validator), args: args})
   end
 
   def delete_table(name) do
@@ -38,18 +39,15 @@ defmodule Repo do
   end
 
   def list_entries(table, count, last) do
-    TableList.get() |> Map.get(table) |> Table.list(count, last)
+    TableList.find_table(table) |> Table.list(count, last)
   end
 
   def list_entries(table, count) do
-    TableList.get() |> Map.get(table) |> Table.list(count)
+    TableList.find_table(table) |> Table.list(count)
   end
 
   def create_entry(table, entry) do
-    id = TableList.get() |> Map.get(table) |> Table.next_id()
-    new = Map.put(entry, :id, id)
-    EventLog.commit(:create_entry, %{table: table, entry: new})
-    new
+    TableList.find_validator(table) |> Validator.create(entry)
   end
 
   def update_entry(table, entry) do
@@ -58,5 +56,20 @@ defmodule Repo do
 
   def delete_entry(table, entry) do
     EventLog.commit(:delete_entry, %{table: table, entry: entry})
+  end
+
+  defmacro blocking(do: expression) do
+    quote do
+      Repo.blocking_call(fn -> unquote(expression) end)
+    end
+  end
+
+  def blocking_call(thunk) do
+    EventLog.subscribe()
+    result = thunk.()
+    receive do
+      _ -> EventLog.unsubscribe()
+    end
+    result
   end
 end

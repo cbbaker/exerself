@@ -1,10 +1,10 @@
 defmodule Repo.Aggregates.Table do
   use GenServer
 
-  defstruct [:entries, :next_id]
+  defstruct [:entries]
 
   def start_link() do
-    GenServer.start_link(__MODULE__, %Repo.Aggregates.Table{entries: [], next_id: 1})
+    GenServer.start_link(__MODULE__, %Repo.Aggregates.Table{entries: []})
   end
 
   def stop(pid) do
@@ -23,12 +23,12 @@ defmodule Repo.Aggregates.Table do
     GenServer.call(pid, {:list, count})
   end
 
-  def init_next_id(pid) do
-    GenServer.cast(pid, :init_next_id)
+  def stream(pid) do
+    GenServer.call(pid, :stream)
   end
 
-  def next_id(pid) do
-    GenServer.call(pid, :next_id)
+  def compute_next_id(pid) do
+    GenServer.call(pid, :compute_next_id)
   end
 
   def create(pid, entry) do
@@ -53,13 +53,13 @@ defmodule Repo.Aggregates.Table do
     {:reply, result, state}
   end
 
-  def handle_call(:next_id, _from, %{next_id: next_id} = state) do
-    {:reply, next_id, %{state | next_id: (next_id + 1)}}
+  def handle_call(:compute_next_id, _from, %{entries: entries} = state) do
+    next_id = entries |> Enum.map(&(&1.id)) |> Enum.max(fn -> 0 end)
+    {:reply, next_id + 1, state}
   end
 
-  def handle_cast(:init_next_id, %{entries: entries} = state) do
-    next_id = entries |> Enum.map(&(&1.id)) |> Enum.max(fn -> 0 end)
-    {:noreply, %{state | next_id: next_id + 1}}
+  def handle_call(:stream, _from, %{entries: entries} = state) do
+    {:reply, entries, state}
   end
 
   def handle_cast({:create, entry}, %{entries: entries} = state) do

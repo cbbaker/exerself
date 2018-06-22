@@ -1,6 +1,8 @@
 defmodule Api.DataSourceControllerTest do
   use Api.ConnCase
 
+  require Repo
+
   @valid_attrs %{
     "name" => "test",
     "schema" => %{},
@@ -12,8 +14,11 @@ defmodule Api.DataSourceControllerTest do
 
   setup do
     Repo.TestLog.reset()
+    Repo.create_table("users")
     Repo.create_table("data_sources")
-    Process.sleep(10)
+
+    user = Repo.blocking do: DataSource.create_or_update_user(@user)
+    %{user: user}
   end
 
   defp setup_headers(%{conn: conn, accept: accept}), do: {:ok, conn: put_req_header(conn, "accept", accept)}
@@ -38,16 +43,16 @@ defmodule Api.DataSourceControllerTest do
 
 
   describe "when logged in" do
-    setup %{conn: conn}, do: {:ok, conn: assign(conn, :current_user, @user)}
+    setup %{conn: conn, user: user}, do: {:ok, conn: assign(conn, :current_user, user)}
 
     test "lists data sources", %{conn: conn} do
       conn = get conn, data_source_path(conn, :index)
       assert json_response(conn, 200)["data"] == []
     end
 
-    test "lists all entries on index", %{conn: conn} do
+    test "lists all entries on index", %{conn: conn, user: user} do
       data_source = "test"
-      DataSource.create(data_source, %{}, [], [])
+      DataSource.create(user, data_source, %{}, [], [])
       conn = get conn, data_source_path(conn, :show, data_source, data_sources: [data_source])
       assert %{"name" => ^data_source} = json_response(conn, 200)
     end
@@ -58,10 +63,10 @@ defmodule Api.DataSourceControllerTest do
       end
     end
 
-    test "creates and renders resource when data is valid", %{conn: conn} do
+    test "creates and renders resource when data is valid", %{conn: conn, user: user} do
       conn = post conn, data_source_path(conn, :create), data_source: @valid_attrs
       assert json_response(conn, 201)["name"]
-      assert DataSource.list(1) == [@valid_attrs["name"]]
+      assert DataSource.list(user, 1) == [@valid_attrs["name"]]
     end
 
     # test "deletes chosen resource", %{conn: conn} do

@@ -15,39 +15,39 @@ defmodule Api.DataSourceController do
     not_authorized(conn, "You must be logged in to do this")
   end
 
-  def static(conn, _params, _current_user) do
-    data_sources = DataSource.list(100)
-    render(conn, "index.html", data_sources: data_sources)
+  def static(conn, _params, current_user) do
+    data_sources = DataSource.list(current_user, 100)
+    render(conn, "index.html", data_sources: Enum.take(data_sources, 20))
   end
 
-  def index(conn, _params, _current_user) do
-    data_sources = DataSource.list(100)
-    render(conn, "index.json", data_sources: data_sources)
+  def index(conn, _params, current_user) do
+    data_sources = DataSource.list(current_user, 100)
+    render(conn, "index.json", data_sources: Enum.take(data_sources, 20))
   end
 
-  def show(conn, %{"id" => name} = params, _current_user) do
-    data_sources = DataSource.list(1000)
+  def show(conn, %{"id" => name} = params, current_user) do
+    data_sources = DataSource.all(current_user)
     if !Enum.member?(data_sources, name) do
       raise Api.NotFound
     end
 
     data_source = %{
       name: name,
-      schema: DataSource.get_schema(name) |> Map.delete(:id),
-      viewers: DataSource.get_viewers(name),
-      editors: DataSource.get_editors(name),
-      entries: Pagination.get_entries(name, params)
+      schema: DataSource.get_schema(current_user, name) |> Map.delete(:id),
+      viewers: DataSource.get_viewers(current_user, name),
+      editors: DataSource.get_editors(current_user, name),
+      entries: Pagination.get_entries(current_user, name, params)
     }
     
-    render(conn, "show.json", data_source: data_source, data_sources: data_sources)
+    render(conn, "show.json", data_source: data_source, data_sources: Enum.take(data_sources, 20))
   end
 
   def create(conn, %{"data_source" => %{"name" => name,
                                         "schema" => schema,
                                         "viewers" => viewers,
-                                        "editors" => editors}}, _current_user) do
-    data_sources = DataSource.list(1000)
-    DataSource.create(name, schema, viewers, editors)
+                                        "editors" => editors}}, current_user) do
+    data_sources = DataSource.list(current_user, 20)
+    DataSource.create(current_user, name, schema, viewers, editors)
     data_source = %{
       name: name,
       schema: schema,

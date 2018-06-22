@@ -1,22 +1,26 @@
 defmodule Api.DataControllerTest do
   use Api.ConnCase
 
+  require Repo
+
   @valid_attrs %{"datum" => "blah"}
   # @invalid_attrs %{}
   @user %{email: "test@gmail.com", name: "bob"}
 
   setup do
     Repo.TestLog.reset()
+    Repo.create_table("users")
     Repo.create_table("data_sources")
+
+    user = DataSource.create_or_update_user(@user)
 
     name = "test"
     schema = %{"datum" => "string"}
     viewers = []
     editors = []
-    DataSource.create(name, schema, viewers, editors)
-    Process.sleep(10)
+    Repo.blocking do: DataSource.create(user, name, schema, viewers, editors)
 
-    {:ok, name: name, schema: schema, viewers: viewers, editors: editors}
+    {:ok, user: user, name: name, schema: schema, viewers: viewers, editors: editors}
   end
 
   defp setup_headers(%{conn: conn, accept: accept}), do: {:ok, conn: put_req_header(conn, "accept", accept)}
@@ -40,19 +44,18 @@ defmodule Api.DataControllerTest do
   end
 
   describe "when logged in" do
-    setup %{conn: conn}, do: {:ok, conn: assign(conn, :current_user, @user)}
+    setup %{conn: conn, user: user}, do: {:ok, conn: assign(conn, :current_user, user)}
 
-    test "shows the resource", %{conn: conn, name: name} do
-      entry = DataSource.create_entry(name, %{})
+    test "shows the resource", %{conn: conn, user: user, name: name} do
+      entry = DataSource.create_entry(user, name, %{})
       conn = get conn, data_source_data_path(conn, :show, name, entry.id)
       assert json_response(conn, 200)["uri"] == data_source_data_path(conn, :show, name, entry.id)
     end
 
-    test "creates and renders resource when data is valid", %{conn: conn, name: name} do
-      conn = post conn, data_source_data_path(conn, :create, name), data: @valid_attrs
+    test "creates and renders resource when data is valid", %{conn: conn, user: user, name: name} do
+      conn = Repo.blocking do: post conn, data_source_data_path(conn, :create, name), data: @valid_attrs
       assert json_response(conn, 201)["uri"]
-      Process.sleep(10)
-      assert [%{"datum" => "blah"}] = DataSource.get_entries(name, 100)
+      assert [%{"datum" => "blah"}] = DataSource.get_entries(user, name, 100)
     end
 
     # test "does not create resource and renders errors when data is invalid", %{conn: conn} do
@@ -60,11 +63,11 @@ defmodule Api.DataControllerTest do
     #   assert json_response(conn, 422)["errors"] != %{}
     # end
 
-    test "updates and renders chosen resource when data is valid", %{conn: conn, name: name} do
-      data = DataSource.create_entry(name, %{})
-      conn = put conn, data_source_data_path(conn, :update, name, data.id), data: @valid_attrs
+    test "updates and renders chosen resource when data is valid", %{conn: conn, user: user, name: name} do
+      data = DataSource.create_entry(user, name, %{})
+      conn = Repo.blocking do: put conn, data_source_data_path(conn, :update, name, data.id), data: @valid_attrs
       assert json_response(conn, 200)["uri"]
-      assert [%{"datum" => "blah"}] = DataSource.get_entries(name, 100)
+      assert [%{"datum" => "blah"}] = DataSource.get_entries(user, name, 100)
     end
 
     # test "does not update chosen resource and renders errors when data is invalid", %{conn: conn} do
@@ -73,11 +76,11 @@ defmodule Api.DataControllerTest do
     #   assert json_response(conn, 422)["errors"] != %{}
     # end
 
-    test "deletes chosen resource", %{conn: conn, name: name} do
-      data = DataSource.create_entry(name, %{})
-      conn = delete conn, data_source_data_path(conn, :delete, name, data.id)
+    test "deletes chosen resource", %{conn: conn, user: user, name: name} do
+      data = DataSource.create_entry(user, name, %{})
+      conn = Repo.blocking do: delete conn, data_source_data_path(conn, :delete, name, data.id)
       assert response(conn, 204)
-      assert DataSource.get_entries(name, 100) == []
+      assert DataSource.get_entries(user, name, 100) == []
     end
   end
 
