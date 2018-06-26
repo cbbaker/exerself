@@ -46,11 +46,18 @@ defmodule Api.DataController do
     render(conn, "show.json", name: name, data: entry)
   end
 
-  def update(conn, %{"data_source_id" => name, "id" => id_string, "data" => data_params}, current_user) do
-    {id, _} = Integer.parse(id_string)
-    entry = Map.put(data_params, :id, id)
-    DataSource.update_entry(current_user, name, entry)
-    render(conn, "show.json", name: name, data: entry)
+  def update(conn,
+    %{"data_source_id" => name, "id" => id_string, "data" => data_params, "user_id" => user_id},
+    current_user) do
+    current_user_id = current_user.id
+    if {^current_user_id, _} = Integer.parse(user_id) do
+      {id, _} = Integer.parse(id_string)
+      entry = Map.put(data_params, :id, id)
+      DataSource.update_entry(current_user, name, entry)
+      render(conn, "show.json", user: %{id: user_id}, name: name, data: entry)
+    else
+      not_authorized(conn, :update, "You don't have permission to edit this")
+    end
   end
 
   def delete(conn, %{"id" => id_string, "data_source_id" => name}, current_user) do

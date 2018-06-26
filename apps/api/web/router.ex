@@ -32,15 +32,15 @@ defmodule Api.Router do
 
     get "/", PageController, :index
 
-    get "/data-sources", DataSourceController, :static
-    get "/data-sources/:data_source", DataController, :static
+    get "/users/:user_id/data-sources", DataSourceController, :static
+    get "/users/:user_id/data-sources/:data_source", DataController, :static
   end
 
   # Other scopes may use custom stacks.
   scope "/api", Api do
     pipe_through :api
 
-    resources "/data-sources", DataSourceController, only: [:index, :create, :show, :delete] do
+    resources "/users/:user_id/data-sources", DataSourceController, only: [:index, :create, :show, :delete] do
       resources "/data", DataController, only: [:show, :create, :update, :delete]
     end
   end

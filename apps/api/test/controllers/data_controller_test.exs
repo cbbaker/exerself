@@ -10,7 +10,7 @@ defmodule Api.DataControllerTest do
   setup do
     Repo.TestLog.reset()
     Repo.create_table("users")
-    Repo.create_table("data_sources")
+    Repo.blocking do: Repo.create_table("data_sources")
 
     user = Repo.blocking do: DataSource.create_or_update_user(@user)
 
@@ -31,15 +31,16 @@ defmodule Api.DataControllerTest do
   describe "when not logged in" do
     setup %{conn: conn}, do: {:ok, conn: assign(conn, :current_user, nil)}
 
-    test "static", %{conn: conn, name: name} do
-      conn = get conn, data_path(conn, :static, name)
+    test "static", %{conn: conn, user: user, name: name} do
+      conn = get conn, data_path(conn, :static, user.id, name)
       assert redirected_to(conn) == page_path(conn, :index)
     end
 
     @tag accept: "application/json"
-    test "index", %{conn: conn, name: name} do
-      conn = post conn, data_source_data_path(conn, :create, name, @valid_attrs)
+    test "index", %{conn: conn, user: user, name: name} do
+      conn = post conn, data_source_data_path(conn, :create, user.id, name, @valid_attrs)
       assert %{"links" => %{"login" => _}} = json_response(conn, 200)
+
     end
   end
 
@@ -48,12 +49,12 @@ defmodule Api.DataControllerTest do
 
     test "shows the resource", %{conn: conn, user: user, name: name} do
       entry = DataSource.create_entry(user, name, %{})
-      conn = get conn, data_source_data_path(conn, :show, name, entry.id)
+      conn = get conn, data_source_data_path(conn, :show, user.id, name, entry.id)
       assert json_response(conn, 200)["uri"] == data_source_data_path(conn, :show, name, entry.id)
     end
 
     test "creates and renders resource when data is valid", %{conn: conn, user: user, name: name} do
-      conn = Repo.blocking do: post conn, data_source_data_path(conn, :create, name), data: @valid_attrs
+      conn = Repo.blocking do: post conn, data_source_data_path(conn, :create, user.id, name), data: @valid_attrs
       assert json_response(conn, 201)["uri"]
       assert [%{"datum" => "blah"}] = DataSource.get_entries(user, name, 100)
     end
@@ -65,7 +66,7 @@ defmodule Api.DataControllerTest do
 
     test "updates and renders chosen resource when data is valid", %{conn: conn, user: user, name: name} do
       data = DataSource.create_entry(user, name, %{})
-      conn = Repo.blocking do: put conn, data_source_data_path(conn, :update, name, data.id), data: @valid_attrs
+      conn = Repo.blocking do: put conn, data_source_data_path(conn, :update, user.id, name, data.id), data: @valid_attrs
       assert json_response(conn, 200)["uri"]
       assert [%{"datum" => "blah"}] = DataSource.get_entries(user, name, 100)
     end
@@ -78,7 +79,7 @@ defmodule Api.DataControllerTest do
 
     test "deletes chosen resource", %{conn: conn, user: user, name: name} do
       data = DataSource.create_entry(user, name, %{})
-      conn = Repo.blocking do: delete conn, data_source_data_path(conn, :delete, name, data.id)
+      conn = Repo.blocking do: delete conn, data_source_data_path(conn, :delete, user.id, name, data.id)
       assert response(conn, 204)
       assert DataSource.get_entries(user, name, 100) == []
     end

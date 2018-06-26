@@ -29,14 +29,14 @@ defmodule Api.DataSourceControllerTest do
   describe "when not logged in" do
     setup %{conn: conn}, do: {:ok, conn: assign(conn, :current_user, nil)}
 
-    test "static", %{conn: conn} do
-      conn = get conn, data_source_path(conn, :static)
+    test "static", %{conn: conn, user: user} do
+      conn = get conn, data_source_path(conn, :static, user.id)
       assert redirected_to(conn) == page_path(conn, :index)
     end
 
     @tag accept: "application/json"
-    test "index", %{conn: conn} do
-      conn = get conn, data_source_path(conn, :index)
+    test "index", %{conn: conn, user: user} do
+      conn = get conn, data_source_path(conn, :index, user.id)
       assert %{"links" => %{"login" => _}} = json_response(conn, 200)
     end
   end
@@ -45,26 +45,26 @@ defmodule Api.DataSourceControllerTest do
   describe "when logged in" do
     setup %{conn: conn, user: user}, do: {:ok, conn: assign(conn, :current_user, user)}
 
-    test "lists data sources", %{conn: conn} do
-      conn = get conn, data_source_path(conn, :index)
+    test "lists data sources", %{conn: conn, user: user} do
+      conn = get conn, data_source_path(conn, :index, user.id)
       assert json_response(conn, 200)["data"] == []
     end
 
     test "lists all entries on index", %{conn: conn, user: user} do
       data_source = "test"
       DataSource.create(user, data_source, %{}, [], [])
-      conn = get conn, data_source_path(conn, :show, data_source, data_sources: [data_source])
+      conn = get conn, data_source_path(conn, :show, user.id, data_source, data_sources: [data_source])
       assert %{"name" => ^data_source} = json_response(conn, 200)
     end
 
-    test "renders page not found when id is nonexistent", %{conn: conn} do
+    test "renders page not found when id is nonexistent", %{conn: conn, user: user} do
       assert_error_sent 404, fn ->
-        get conn, data_source_path(conn, :show, -1)
+        get conn, data_source_path(conn, :show, user.id, -1)
       end
     end
 
     test "creates and renders resource when data is valid", %{conn: conn, user: user} do
-      conn = post conn, data_source_path(conn, :create), data_source: @valid_attrs
+      conn = post conn, data_source_path(conn, :create, user.id), data_source: @valid_attrs
       assert json_response(conn, 201)["name"]
       assert DataSource.list(user, 1) == [@valid_attrs["name"]]
     end

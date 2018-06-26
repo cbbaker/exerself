@@ -18,7 +18,7 @@ defmodule Api.AuthController do
       {:ok, user} = Validate.valid(%{email: email, name: name, image: image})
       conn
       |> put_session(:current_user, user)
-      |> redirect(to: data_source_path(conn, :static))
+      |> redirect(to: data_source_path(conn, :static, user.id))
     else
       conn
       |> redirect(to: "/")
@@ -38,7 +38,7 @@ defmodule Api.AuthController do
         conn
         |> put_flash(:info, "Successfully authenticated.")
         |> put_session(:current_user, info)
-        |> redirect(to: data_source_path(conn, :static))
+        |> redirect(to: data_source_path(conn, :static, info.id))
       {:error, reason} ->
         conn
         |> put_flash(:error, reason)
