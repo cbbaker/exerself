@@ -1,12 +1,14 @@
 defmodule Import do
   use HTTPoison.Base
 
+  require Repo
+
   def process_url(path) do
     Application.get_env(:import, :exerself_url) <> path
   end
 
   def import(email, password) do
-    Repo.create_table("users", Repo.Validators.Upsert, [:email])
+    Repo.blocking do: Repo.create_table("users", Repo.Validators.Upsert, [:email])
     user = DataSource.create_or_update_user(%{email: email})
     Repo.create_table("data_sources")
     cookies = sign_in(email, password)

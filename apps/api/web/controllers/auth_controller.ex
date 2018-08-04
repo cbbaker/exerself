@@ -15,8 +15,9 @@ defmodule Api.AuthController do
                                      "image" => image,
                                      "password" => password}}) do
     if password == @test_password do
+      {:ok, user} = Validate.valid(%{email: email, name: name, image: image})
       conn
-      |> put_session(:current_user, %{email: email, name: name, image: image})
+      |> put_session(:current_user, user)
       |> redirect(to: data_source_path(conn, :static))
     else
       conn

@@ -41,7 +41,7 @@ defmodule Repo.Validators.Upsert do
       else
         new_last_id = last_id + 1
         new_entry = Map.put(entry, :id, new_last_id)
-        Repo.EventLog.commit(:create_entry, %{table: table, entry: new_last_id})
+        Repo.EventLog.commit(:create_entry, %{table: table, entry: new_entry})
         new_id_map = Map.put(id_map, this_key, new_last_id)
         {:reply, new_entry, Map.merge(state, %{last_id: new_last_id, id_map: new_id_map})}
       end

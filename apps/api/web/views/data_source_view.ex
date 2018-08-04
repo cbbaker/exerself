@@ -45,6 +45,26 @@ defmodule Api.DataSourceView do
     end
   end
 
+  def render("auth.json", %{conn: conn, message: message}) do
+    %{
+      uri: page_path(conn, :index),
+      title: "Sign in",
+      message: message,
+      nav:
+      %{
+        brand: "Exerself",
+        menus: []
+      },
+      links:
+      %{
+        login: %{
+          text: "Sign in via Google",
+          url: "/auth/google"
+        }
+      }
+    }
+  end
+
   def show_entry(conn, name, entry) do
     %{ uri: data_source_data_path(conn, :show, name, entry.id),
        data: entry,
