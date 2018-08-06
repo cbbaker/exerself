@@ -1,6 +1,8 @@
 defmodule IntegrationTests do
   use Hound.Helpers
 
+  require Repo
+
   @moduledoc """
   Documentation for IntegrationTests.
   """

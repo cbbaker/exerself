@@ -12,7 +12,7 @@ defmodule Api.DataControllerTest do
     Repo.create_table("users")
     Repo.create_table("data_sources")
 
-    user = DataSource.create_or_update_user(@user)
+    user = Repo.blocking do: DataSource.create_or_update_user(@user)
 
     name = "test"
     schema = %{"datum" => "string"}
@@ -33,13 +33,13 @@ defmodule Api.DataControllerTest do
 
     test "static", %{conn: conn, name: name} do
       conn = get conn, data_path(conn, :static, name)
-      assert html_response(conn, 403)
+      assert redirected_to(conn) == page_path(conn, :index)
     end
 
     @tag accept: "application/json"
     test "index", %{conn: conn, name: name} do
       conn = post conn, data_source_data_path(conn, :create, name, @valid_attrs)
-      assert json_response(conn, 403)
+      assert %{"links" => %{"login" => _}} = json_response(conn, 200)
     end
   end
 

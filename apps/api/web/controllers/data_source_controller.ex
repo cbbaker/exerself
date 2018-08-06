@@ -7,12 +7,12 @@ defmodule Api.DataSourceController do
     if Validate.valid(current_user) do
       apply(__MODULE__, action_name(conn), [conn, conn.params, current_user])
     else
-      not_authorized(conn, "You don't have access to this resource")
+      not_authorized(conn, action_name(conn), "You don't have access to this resource")
     end
   end
 
   def action(conn, _) do
-    not_authorized(conn, "You must be logged in to do this")
+    not_authenticated(conn, action_name(conn), "You must be logged in to do this")
   end
 
   def static(conn, _params, current_user) do
@@ -68,22 +68,24 @@ defmodule Api.DataSourceController do
   #   send_resp(conn, :no_content, "")
   # end
 
-  defp not_authorized(conn, message) do
-    if accepts_json(conn) do
-      conn
-      |> put_status(:forbidden)
-      |> json(%{message: message})
-    else
-      conn
-      |> put_status(:forbidden)
-      |> render("error.html", message: message)
-    end
+  defp not_authenticated(conn, :static, _message) do
+    redirect(conn, to: page_path(conn, :index))
   end
 
-  defp accepts_json(%{req_headers: req_headers}) do
-    req_headers |> List.keyfind("accept", 0) |> test_headers()
+  defp not_authenticated(conn, _action, message) do
+    conn
+    |> render("auth.json", message: message)
   end
 
-  defp test_headers({"accept", "application/json"}), do: true
-  defp test_headers(_), do: false
+  defp not_authorized(conn, :static, message) do
+    conn
+    |> put_status(:forbidden)
+    |> render("error.html", message: message)
+  end
+
+  defp not_authorized(conn, _action, message) do
+    conn
+    |> put_status(:forbidden)
+    |> json(%{message: message})
+  end
 end

@@ -31,13 +31,13 @@ defmodule Api.DataSourceControllerTest do
 
     test "static", %{conn: conn} do
       conn = get conn, data_source_path(conn, :static)
-      assert html_response(conn, 403)
+      assert redirected_to(conn) == page_path(conn, :index)
     end
 
     @tag accept: "application/json"
     test "index", %{conn: conn} do
       conn = get conn, data_source_path(conn, :index)
-      assert json_response(conn, 403)
+      assert %{"links" => %{"login" => _}} = json_response(conn, 200)
     end
   end
 
