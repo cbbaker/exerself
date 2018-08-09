@@ -1,0 +1,9 @@
+<div class="container">
+  <h1>Recent events:</h1>
+  <dl class="row">
+    <%= for {type, data} <- @terms do %>
+        <dt class="col-sm-2"><%= type %></dt>
+        <dd class="col-sm-10"><%= render_value(data) %></dd>
+    <% end %>
+  </dl>
+</div>

@@ -1,0 +1,7 @@
+<ul class="row">
+  <%= for v <- @list do %>
+      <li class="col-sm-12">
+        <%= render_value(v) %>
+      </li>
+  <% end %>
+</ul>
