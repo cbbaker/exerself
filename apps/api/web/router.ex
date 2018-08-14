@@ -34,6 +34,8 @@ defmodule Api.Router do
 
     get "/data-sources", DataSourceController, :static
     get "/data-sources/:data_source", DataController, :static
+
+    get "/events", EventsController, :index
   end
 
   # Other scopes may use custom stacks.
