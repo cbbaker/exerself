@@ -3,7 +3,6 @@ defmodule Repo.Aggregates.TableListTest do
   require Repo
   
   alias Repo.Aggregates.TableList
-  alias Repo.Aggregates.Table
   alias TestLog
 
   setup context do
@@ -17,8 +16,8 @@ defmodule Repo.Aggregates.TableListTest do
   @tag commits: [{:create_table, %{name: "stuff"}},
                  {:create_entry, %{table: "stuff", entry: %{id: 5, data: "data"}}}]
   test "updates the next_id of all tables on init" do
-    # assert TableList.find_table("stuff") |> Table.next_id() == 6
-    assert TableList.find_table("stuff") |> Table.compute_next_id() == 6
+    Repo.blocking do: Repo.create_entry("stuff",  %{data: "test"})
+    assert [%{data: "test", id: 6}, %{data: "data", id: 5}] = Repo.list_entries("stuff", 5)
   end
 
   test "returns the current list of tables" do

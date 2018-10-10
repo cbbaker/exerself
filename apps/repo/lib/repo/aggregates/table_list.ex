@@ -37,37 +37,35 @@ defmodule Repo.Aggregates.TableList do
     IO.puts("terminate: #{inspect reason} #{inspect self()}")
   end
 
-  def process({:create_table, %{name: name, validator: validator_name, args: args}}, {tables, validators}) do
+  def process({:create_table, %{name: name, validator: validator_name, args: args}}, {tables, validators, create_list}) do
     {:ok, table} = Table.start_link()
-    {:ok, validator} = apply(String.to_existing_atom(validator_name), :start_link, [name, table] ++ args)
-    {Map.put(tables, name, table), Map.put(validators, name, validator)}
+    {Map.put(tables, name, table), validators, [{name, String.to_existing_atom(validator_name), [name, table] ++ args} | create_list]}
   end
 
-  def process({:create_table, %{name: name}}, {tables, validators}) do
+  def process({:create_table, %{name: name}}, {tables, validators, create_list}) do
     {:ok, table} = Table.start_link()
-    {:ok, validator} = Repo.Validators.AutoIncrement.start_link(name, table)
-    {Map.put(tables, name, table), Map.put(validators, name, validator)}
+    {Map.put(tables, name, table), validators, [{name, Repo.Validators.AutoIncrement, [name, table]} | create_list]}
   end
 
-  def process({:delete_table, %{name: name}}, {tables, validators}) do
+  def process({:delete_table, %{name: name}}, {tables, validators, create_list}) do
     {table, new_tables} = Map.pop(tables, name)
     Table.stop(table)
     {validator, new_validators} = Map.pop(validators, name)
     Validator.stop(validator)
-    {new_tables, new_validators}
+    {new_tables, new_validators, create_list}
   end
 
-  def process({:create_entry, %{table: table, entry: entry}}, {tables, _} = acc) do
+  def process({:create_entry, %{table: table, entry: entry}}, {tables, _, _} = acc) do
     tables |> Map.get(table) |> Table.create(entry)
     acc
   end
 
-  def process({:update_entry, %{table: table, entry: entry}}, {tables, _} = acc) do
+  def process({:update_entry, %{table: table, entry: entry}}, {tables, _, _} = acc) do
     tables |> Map.get(table) |> Table.update(entry)
     acc
   end
 
-  def process({:delete_entry, %{table: table, entry: entry}}, {tables, _} = acc) do
+  def process({:delete_entry, %{table: table, entry: entry}}, {tables, _, _} = acc) do
     tables |> Map.get(table) |> Table.delete(entry)
     acc
   end
@@ -78,7 +76,7 @@ defmodule Repo.Aggregates.TableList do
   
   defp replay_log(%{logger: logger, log: log, tables: tables, validators: validators}) do
     logger.get_terms(log) |>
-      Enum.reduce({tables, validators}, &process/2)
+      Enum.reduce({tables, validators, []}, &process/2)
   end
 
   def handle_call(:get, _from, state) do
@@ -100,17 +98,29 @@ defmodule Repo.Aggregates.TableList do
     Enum.each(state.tables, fn {_name, table} ->
       Table.stop(table)
     end)
-    {tables, validators} = Map.merge(state, %{tables: %{}, validators: %{}}) |> replay_log()
-    {:reply, :ok, Map.merge(state, %{tables: tables, validators: validators})}
+    {tables, validators, create_list} = Map.merge(state, %{tables: %{}, validators: %{}}) |> replay_log()
+    new_validators = create_validators(validators, create_list)
+    {:reply, :ok, Map.merge(state, %{tables: tables, validators: new_validators})}
   end
 
   def handle_info(:timeout, state) do
-    {tables, validators} = replay_log(state)
-    {:noreply, Map.merge(state, %{tables: tables, validators: validators})}
+    {tables, validators, create_list} = replay_log(state)
+    new_validators = create_validators(validators, create_list)
+    {:noreply, Map.merge(state, %{tables: tables, validators: new_validators})}
   end
 
   def handle_info(msg, state) do
-    {tables, validators} = process(msg, {state.tables, state.validators})
-    {:noreply, Map.merge(state, %{tables: tables, validators: validators})}
+    {tables, validators, create_list} = process(msg, {state.tables, state.validators, []})
+    new_validators = create_validators(validators, create_list)
+    {:noreply, Map.merge(state, %{tables: tables, validators: new_validators})}
+  end
+
+  defp create_validators(validators, [{name, mod, args} | rest]) do
+    {:ok, validator} = apply(mod, :start_link, args)
+    create_validators(Map.put(validators, name, validator), rest)
+  end
+
+  defp create_validators(validators, []) do
+    validators
   end
 end
