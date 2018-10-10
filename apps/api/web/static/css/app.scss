@@ -1,0 +1,24 @@
+/* This file is for your main application css. */
+$base-color: #FF5126;
+$brand-primary: #0081D9;
+$brand-danger: #F8550D;
+$body-bg: lighten($base-color, 42%);
+$card-bg: $body-bg;
+$card-cap-bg: lighten($base-color, 15%);
+$input-group-addon-bg: $body-bg;
+$list-group-bg: $body-bg;
+$input-bg: $body-bg;
+$body-color: darken($base-color, 45%);
+$input-color: $body-color;
+/* $base-color: #88C542; */
+/* $brand-primary: #0081D9; */
+/* $brand-danger: #F8550D; */
+/* $body-bg: lighten($base-color, 45%); */
+/* $card-bg: $body-bg; */
+/* $card-cap-bg: lighten($base-color, 35%); */
+/* $input-group-addon-bg: $body-bg; */
+/* $list-group-bg: $body-bg; */
+/* $input-bg: $body-bg; */
+/* $body-color: darken($base-color, 40%); */
+
+@import "bootstrap";
