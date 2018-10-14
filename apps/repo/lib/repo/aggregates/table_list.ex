@@ -3,6 +3,7 @@ defmodule Repo.Aggregates.TableList do
 
   alias Repo.EventLog
   alias Repo.Aggregates.Table
+  alias Repo.Aggregates.LogProcessor
   alias Repo.Validator
 
   defstruct [:logger, :log, :tables, :validators]
@@ -34,49 +35,8 @@ defmodule Repo.Aggregates.TableList do
   end
 
   def terminate(reason, _state) do
+    EventLog.unsubscribe()
     IO.puts("terminate: #{inspect reason} #{inspect self()}")
-  end
-
-  def process({:create_table, %{name: name, validator: validator_name, args: args}}, {tables, validators, create_list}) do
-    {:ok, table} = Table.start_link()
-    {Map.put(tables, name, table), validators, [{name, String.to_existing_atom(validator_name), [name, table] ++ args} | create_list]}
-  end
-
-  def process({:create_table, %{name: name}}, {tables, validators, create_list}) do
-    {:ok, table} = Table.start_link()
-    {Map.put(tables, name, table), validators, [{name, Repo.Validators.AutoIncrement, [name, table]} | create_list]}
-  end
-
-  def process({:delete_table, %{name: name}}, {tables, validators, create_list}) do
-    {table, new_tables} = Map.pop(tables, name)
-    Table.stop(table)
-    {validator, new_validators} = Map.pop(validators, name)
-    Validator.stop(validator)
-    {new_tables, new_validators, create_list}
-  end
-
-  def process({:create_entry, %{table: table, entry: entry}}, {tables, _, _} = acc) do
-    tables |> Map.get(table) |> Table.create(entry)
-    acc
-  end
-
-  def process({:update_entry, %{table: table, entry: entry}}, {tables, _, _} = acc) do
-    tables |> Map.get(table) |> Table.update(entry)
-    acc
-  end
-
-  def process({:delete_entry, %{table: table, entry: entry}}, {tables, _, _} = acc) do
-    tables |> Map.get(table) |> Table.delete(entry)
-    acc
-  end
-
-  def process(_event, acc) do
-    acc
-  end
-  
-  defp replay_log(%{logger: logger, log: log, tables: tables, validators: validators}) do
-    logger.get_terms(log) |>
-      Enum.reduce({tables, validators, []}, &process/2)
   end
 
   def handle_call(:get, _from, state) do
@@ -98,29 +58,17 @@ defmodule Repo.Aggregates.TableList do
     Enum.each(state.tables, fn {_name, table} ->
       Table.stop(table)
     end)
-    {tables, validators, create_list} = Map.merge(state, %{tables: %{}, validators: %{}}) |> replay_log()
-    new_validators = create_validators(validators, create_list)
-    {:reply, :ok, Map.merge(state, %{tables: tables, validators: new_validators})}
+    updated = Map.merge(state, %{tables: %{}, validators: %{}}) |> LogProcessor.replay_log()
+    {:reply, :ok, Map.merge(state, updated)}
   end
 
   def handle_info(:timeout, state) do
-    {tables, validators, create_list} = replay_log(state)
-    new_validators = create_validators(validators, create_list)
-    {:noreply, Map.merge(state, %{tables: tables, validators: new_validators})}
+    updated = LogProcessor.replay_log(state)
+    {:noreply, Map.merge(state, updated)}
   end
 
   def handle_info(msg, state) do
-    {tables, validators, create_list} = process(msg, {state.tables, state.validators, []})
-    new_validators = create_validators(validators, create_list)
-    {:noreply, Map.merge(state, %{tables: tables, validators: new_validators})}
-  end
-
-  defp create_validators(validators, [{name, mod, args} | rest]) do
-    {:ok, validator} = apply(mod, :start_link, args)
-    create_validators(Map.put(validators, name, validator), rest)
-  end
-
-  defp create_validators(validators, []) do
-    validators
+    updated = LogProcessor.process_entry(msg, state)
+    {:noreply, Map.merge(state, updated)}
   end
 end
