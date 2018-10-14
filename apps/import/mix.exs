@@ -38,6 +38,7 @@ defmodule Import.Mixfile do
   defp deps do
     [{:httpoison, "~> 1.0"},
      {:hackney, "1.10.1"},
-     {:floki, "~> 0.20.0"}]
+     {:floki, "~> 0.20.0"},
+     {:repo, in_umbrella: true}]
   end
 end
