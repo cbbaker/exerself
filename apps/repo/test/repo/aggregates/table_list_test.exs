@@ -3,6 +3,8 @@ defmodule Repo.Aggregates.TableListTest do
   require Repo
   
   alias Repo.Aggregates.TableList
+  alias Repo.Aggregates.Table
+  alias Repo.EventLog
   alias TestLog
 
   setup context do
@@ -44,6 +46,16 @@ defmodule Repo.Aggregates.TableListTest do
     assert TableList.find_table("blah")
     Repo.blocking do: Repo.delete_table("blah")
     refute TableList.find_table("blah")
+  end
+
+  test "revalidates a table" do
+    Repo.blocking do: Repo.create_table("blah", "Elixir.Repo.Validators.AutoIncrement")
+    Enum.each(1..5, fn _ -> TableList.find_table("blah") |> Table.create(%{}) end)
+    assert [%{}, %{}, %{}, %{}, %{}] = Repo.list_entries("blah", 5)
+    Repo.blocking do: EventLog.commit(:revalidate_table, %{name: "blah"})
+    assert [%{id: 5}, %{id: 4}, %{id: 3}, %{id: 2}, %{id: 1}] = Repo.list_entries("blah", 5)
+    Repo.blocking do: Repo.create_entry("blah", %{})
+    assert [%{id: 6}, %{id: 5}, %{id: 4}, %{id: 3}, %{id: 2}] = Repo.list_entries("blah", 5)    
   end
 
   test "creates a table entry" do

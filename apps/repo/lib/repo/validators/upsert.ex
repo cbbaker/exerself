@@ -56,4 +56,5 @@ end
 defimpl Repo.Validator, for: Repo.Validators.Upsert do
   def stop(%{pid: pid}), do: GenServer.stop(pid)
   def create(%{pid: pid, name: name}, entry), do: GenServer.call(pid, {:create, name, entry})
+  def revalidate(%{pid: _pid}, entries), do: entries
 end

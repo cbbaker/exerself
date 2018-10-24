@@ -1,6 +1,8 @@
 defmodule Repo.Aggregates.Table do
   use GenServer
 
+  alias Repo.Validator
+
   defstruct [:entries]
 
   def start_link() do
@@ -39,6 +41,10 @@ defmodule Repo.Aggregates.Table do
     GenServer.cast(pid, {:delete, entry})
   end
 
+  def revalidate(pid, validator) do
+    GenServer.call(pid, {:revalidate, validator})
+  end
+
   def handle_call({:list, count, last}, _from, %{entries: entries} = state) do
     result = entries |> Enum.drop_while(fn (entry) -> entry.id >= last end) |> Enum.take(count)
     {:reply, result, state}
@@ -50,7 +56,12 @@ defmodule Repo.Aggregates.Table do
   end
 
   def handle_call(:stream, _from, %{entries: entries} = state) do
-    {:reply, entries, state}
+    {:reply, Enum.reverse(entries), state}
+  end
+
+  def handle_call({:revalidate, validator}, _from, %{entries: entries}) do
+    new_entries =  Validator.revalidate(validator, Enum.reverse(entries))
+    {:reply, new_entries, %{entries: Enum.reverse(new_entries)}}
   end
 
   def handle_cast({:create, entry}, %{entries: entries} = state) do
