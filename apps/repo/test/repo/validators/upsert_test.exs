@@ -8,6 +8,7 @@ defmodule Repo.Validators.UpsertTest do
 
   setup do
     {:ok, table} = Table.start_link()
+    Table.create(table, 2)      # bogus element
     ["asdf", "sdfg", "qwer"] |>
       Enum.with_index() |> 
       Enum.each(fn {name, id} -> Table.create(table, %{id: (id + 1), name: name, updated: false}) end)

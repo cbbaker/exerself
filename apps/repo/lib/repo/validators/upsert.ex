@@ -19,16 +19,20 @@ defmodule Repo.Validators.Upsert do
 
     def init([table, key]) do
       state = Table.stream(table) |>
-        Enum.reduce(%Repo.Validators.Upsert.Server{key: key, last_id: 0, id_map: %{}},
-          fn(entry, %{key: key, last_id: last_id, id_map: id_map} = state) ->
-            Map.merge(state, 
-              %{last_id: Enum.max([last_id, entry.id]),
-                id_map: Map.put(id_map, Map.fetch!(entry, key), entry.id)
-              }
-            )
-          end
-        )
+        Enum.reduce(%Repo.Validators.Upsert.Server{key: key, last_id: 0, id_map: %{}}, &update/2)
       {:ok, state}
+    end
+
+    defp update(%{id: entry_id} = entry, %{key: key, last_id: last_id, id_map: id_map} = state) do
+      Map.merge(state, 
+        %{last_id: Enum.max([last_id, entry_id]),
+          id_map: Map.put(id_map, Map.fetch!(entry, key), entry_id)
+        }
+      )
+    end
+
+    defp update(_, state) do
+      state
     end
 
     def handle_call({:create, table, entry}, _from, %{key: key, last_id: last_id, id_map: id_map} = state) do
@@ -52,4 +56,5 @@ end
 defimpl Repo.Validator, for: Repo.Validators.Upsert do
   def stop(%{pid: pid}), do: GenServer.stop(pid)
   def create(%{pid: pid, name: name}, entry), do: GenServer.call(pid, {:create, name, entry})
+  def revalidate(%{pid: _pid}, entries), do: entries
 end
